@@ -26,7 +26,9 @@ class Call extends Model
         'updated_at'
     ];
     
+    /*
     public function channel() {
         return $this->belongsTo('App\Model\Channel');
     }
+    */
 }

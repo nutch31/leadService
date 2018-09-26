@@ -18,6 +18,7 @@ class Campaign extends Model
         'updated_at_campaigns'
     ];
 
+    /*
     public function account() {
         return $this->belongsTo('App\Model\Account');
     }
@@ -25,4 +26,5 @@ class Campaign extends Model
     public function channels(){
         return $this->hasMany('App\Model\Channel', 'campaign_id', 'campaign_id');
     }
+    */
 }

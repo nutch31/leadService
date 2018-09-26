@@ -26,6 +26,7 @@ class Channel extends Model
         'daily_max_leads'
     ];
     
+    /*
     public function campaign() {
         return $this->belongsTo('App\Model\Campaign');
     }
@@ -37,4 +38,5 @@ class Channel extends Model
     public function forms(){
         return $this->hasMany('App\Model\Form', 'channel_id', 'channel_id');
     }
+    */
 }

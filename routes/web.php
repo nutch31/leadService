@@ -1,6 +1,6 @@
 <?php
 
-date_default_timezone_set('Asia/Bangkok');
+date_default_timezone_set('GMT');
 
 /*
 |--------------------------------------------------------------------------
@@ -36,7 +36,19 @@ $router->post('/postcampaign', 'Api\CampaignController@postCampaign');
 $router->post('/postchannel', 'Api\ChannelController@postChannel');
 
 $router->get('/getcalls', 'Api\CallController@getCalls');
+$router->get('/getcalls/{DidPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone');
+$router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone_CallerPhone');
+$router->get('/getcalls/{DidPhone:[0-9]+}/getStartEndDate', 'Api\CallController@getCalls_DidPhone_getStartEndDate');
+$router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\CallController@getCalls_DidPhone_CallerPhone_SubmitDateTime');
+$router->get('/getcalls/byPeriod/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate');
+$router->get('/getcalls/byPeriod/count/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Count');
 $router->post('/postcall', 'Api\CallController@postCall');
 
 $router->get('/getforms', 'Api\FormController@getForms');
+$router->get('/getforms/{analyticCampaignId:[0-9]+}', 'Api\FormController@getForms_AnalyticCampaignId');
+$router->get('/getforms/{analyticCampaignId:[0-9]+}/getStartEndDate', 'Api\FormController@getForms_AnalyticCampaignId_getStartEndDate');
+$router->get('/getforms/{analyticCampaignId:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_CallerPhone_SubmitDateTime');
+$router->get('/getforms/byPeriod/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime');
+$router->get('/getforms/byPeriod/count/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count');
 $router->post('/postform', 'Api\FormController@postForm');
+

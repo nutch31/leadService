@@ -37,8 +37,10 @@ class Account extends Model
         'analytics'
     ];
 
+    /*
     public function campaigns()
     {
         return $this->hasMany('App\Model\Campaign', 'account_id', 'account_id');
     }
+    */
 }

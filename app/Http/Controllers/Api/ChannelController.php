@@ -42,7 +42,7 @@ class ChannelController extends BaseController
         }
         else
         {
-            $channel = Channel::where('campaign_id', '=', $request->campaign_id)
+            $channel = Channel::where('channel_id', '=', $request->channel_id)
             ->update([                
                 'channel_id' => $request->channel_id, 
                 'campaign_id' => $request->campaign_id, 
