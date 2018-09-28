@@ -133,7 +133,7 @@ class CallController extends BaseController
             $calls = $calls->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime]);
         }
 
-        $calls = $calls->orderBy('calls.call_id', 'asc')
+        $calls = $calls->orderBy('calls.date', 'asc')
                         ->get();
 
         foreach($calls as $callKey => $call)
@@ -207,7 +207,10 @@ class CallController extends BaseController
             'channel_id' => 'required'
         ]);
 
-        $count = Call::where('call_id', '=', $request->call_id)->count();
+        $count = Call::where('date', '=', $request->date)
+                    ->where('channel_id', '=', $request->channel_id)
+                    ->where('phone', '=', $request->phone)
+                    ->count();
 
         if($count == 0)
         {

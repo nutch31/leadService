@@ -127,7 +127,7 @@ class FormController extends BaseController
             $forms = $forms->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime]);
         }
                     
-        $forms = $forms->orderBy('forms.form_id', 'asc')->get();
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')->get();
 
         foreach($forms as $formKey => $form)
         {                               
@@ -212,7 +212,11 @@ class FormController extends BaseController
             'channel_id' => 'required'
         ]);
 
-        $count = Form::where('form_id', '=', $request->form_id)->count();
+        $count = Form::where('created_at_forms', '=', $request->created_at)
+                    ->where('channel_id', '=', $request->channel_id)
+                    ->where('email', '=', $request->email)
+                    ->where('phone', '=', $request->phone)
+                    ->count();
 
         if($count == 0)
         {

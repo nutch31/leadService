@@ -52,3 +52,6 @@ $router->get('/getforms/byPeriod/{analyticCampaignId:[0-9]+}/{StartDateTime}/{En
 $router->get('/getforms/byPeriod/count/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count');
 $router->post('/postform', 'Api\FormController@postForm');
 
+$router->post('/PbxCallService', 'Api\PbxCallServiceController@PbxCallService');
+$router->post('/LandingPageCallService', 'Api\LandingPageCallServiceController@LandingPageCallService');
+
