@@ -10,14 +10,9 @@ class pbxcallservice extends Model
     protected $fillable = [
         'response', 
         'status',
+        'status_pbx',
         'call_id_leadservice',
         'created_at', 
         'updated_at'
     ];
-     
-    /*
-    public function channel() {
-        return $this->belongsTo('App\Model\Channel');
-    }
-    */
 }

@@ -51,8 +51,6 @@ class LandingPageCallServiceController extends BaseController
 
         $page_url = $request->get('page_url');            
         
-        //$count = Form::where('channel_id', '=', $channel_id)->where('email', '=', $email)->where('phone', '=', $phone_number)->count();
-        
         $count = Form::where('channel_id', '=', $channel_id)->where(function($query) use ($email, $phone_number)
         {
             $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);

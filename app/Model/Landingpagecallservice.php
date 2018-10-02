@@ -14,10 +14,4 @@ class Landingpagecallservice extends Model
         'created_at', 
         'updated_at'
     ];
-     
-    /*
-    public function channel() {
-        return $this->belongsTo('App\Model\Channel');
-    }
-    */
 }
