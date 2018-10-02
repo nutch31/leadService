@@ -119,7 +119,12 @@ class FormController extends BaseController
         }
         else
         {
-            $forms = $forms->where('channels.adwords_campaign_id', '!=' ,'')->orWhere('channels.facebook_campaign_id', '!=', '');
+            $analyticCampaignId_use = "";
+
+            $forms = $forms->where(function($query) use ($analyticCampaignId_use)
+            {
+                $query->where('channels.adwords_campaign_id', '!=', $analyticCampaignId_use)->orWhere('channels.facebook_campaign_id', '!=', $analyticCampaignId_use);
+            });
         }
         
         if(isset($request->CallerPhone))
@@ -191,9 +196,14 @@ class FormController extends BaseController
     {
         $response = array();
 
+        $analyticCampaignId_use = $request->analyticCampaignId;
+
         $count = DB::table('forms')
                     ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
-                    ->where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId)
+                    ->where(function($query) use ($analyticCampaignId_use)
+                    {
+                        $query->where('channels.adwords_campaign_id', '=', $analyticCampaignId_use)->orWhere('channels.facebook_campaign_id', '=', $analyticCampaignId_use);
+                    })                    
                     ->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime])
                     ->count();    
                     
