@@ -42,7 +42,12 @@ class FormController extends BaseController
         $forms_maxDate = DB::table('forms')                    
                     ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
                     ->where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId)
-                    ->max('forms.created_at_forms');
+                    ->max('forms.created_at_forms');                    
+        
+        if(is_null($forms_minDate) || is_null($forms_maxDate))
+        {   
+            return response('{"response":"Not Have Leads"}', '200');
+        }
                     
         $dt = Carbon::createFromFormat('Y-m-d H:i:s', $forms_minDate);
         //$dt->setTimezone($this->timezone);
@@ -105,7 +110,12 @@ class FormController extends BaseController
 
         if(isset($request->analyticCampaignId))
         {
-            $forms = $forms->where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId);
+            $analyticCampaignId_use = $request->analyticCampaignId;
+
+            $forms = $forms->where(function($query) use ($analyticCampaignId_use)
+            {
+                $query->where('channels.adwords_campaign_id', '=', $analyticCampaignId_use)->orWhere('channels.facebook_campaign_id', '=', $analyticCampaignId_use);
+            });
         }
         else
         {

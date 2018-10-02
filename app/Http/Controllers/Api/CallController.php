@@ -24,31 +24,50 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
-    public function getCalls_DidPhone(Request $request)
+    /*public function getCalls_DidPhone(Request $request)
     {
         $response = $this->Reponse_getCalls($request);     
         return response($response, '200');
-    }
+    }*/
 
     public function getCalls_DidPhone_CallerPhone(Request $request)
     {
+        $request->StartDateTime = Carbon::parse($request->StartDateTime);
+        $request->StartDateTime->setTimezone($this->timezone);
+
+        $request->EndDateTime = Carbon::parse($request->EndDateTime);
+        $request->EndDateTime->setTimezone($this->timezone);
+        
         $response = $this->Reponse_getCalls($request);      
         return response($response, '200');
     }
 
     public function getCalls_DidPhone_getStartEndDate(Request $request)
     {           
+        $request->StartDateTime = Carbon::parse($request->StartDateTime);
+        $request->StartDateTime->setTimezone($this->timezone);
+
+        $request->EndDateTime = Carbon::parse($request->EndDateTime);
+        $request->EndDateTime->setTimezone($this->timezone);
+
         $response = array();
 
         $calls_minDate = DB::table('calls')
                     ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
                     ->where('channels.tracking_phone', '=', $request->DidPhone)
+                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime])
                     ->min('calls.date');
 
         $calls_maxDate = DB::table('calls')
                     ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
                     ->where('channels.tracking_phone', '=', $request->DidPhone)
+                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime])
                     ->max('calls.date');
+        
+        if(is_null($calls_minDate) || is_null($calls_maxDate))
+        {   
+            return response('{"response":"Not Have Leads"}', '200');
+        }
                     
         $dt = Carbon::createFromFormat('Y-m-d H:i:s', $calls_minDate);
         //$dt->setTimezone($this->timezone);

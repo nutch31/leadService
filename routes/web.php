@@ -36,9 +36,9 @@ $router->post('/postcampaign', 'Api\CampaignController@postCampaign');
 $router->post('/postchannel', 'Api\ChannelController@postChannel');
 
 $router->get('/getcalls', 'Api\CallController@getCalls');
-$router->get('/getcalls/{DidPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone');
-$router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone_CallerPhone');
-$router->get('/getcalls/{DidPhone:[0-9]+}/getStartEndDate', 'Api\CallController@getCalls_DidPhone_getStartEndDate');
+//$router->get('/getcalls/{DidPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone');
+$router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_CallerPhone');
+$router->get('/getcalls/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}/getStartEndDate', 'Api\CallController@getCalls_DidPhone_getStartEndDate');
 $router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\CallController@getCalls_DidPhone_CallerPhone_SubmitDateTime');
 $router->get('/getcalls/byPeriod/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate');
 $router->get('/getcalls/byPeriod/count/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Count');

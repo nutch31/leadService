@@ -91,7 +91,7 @@ class PbxCallServiceController extends BaseController
             $call_mapped = "";
         }    
         
-        $this->call_herobase($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice->id);
+        //$this->call_herobase($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice->id);
 
         $count = Call::where([
             ['channel_id', '=', $campaign_id],
