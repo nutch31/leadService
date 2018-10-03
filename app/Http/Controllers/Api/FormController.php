@@ -231,8 +231,11 @@ class FormController extends BaseController
             'form_id' => 'required',
             'channel_id' => 'required'
         ]);
+        
+        $StartDateTime = date("Y-m-d H:i:s", (strtotime(date($request->created_at)) - 3));
+        $EndDateTime = date("Y-m-d H:i:s", (strtotime(date($request->created_at)) + 3));
 
-        $count = Form::where('created_at_forms', '=', $request->created_at)
+        $count = Form::whereBetween('created_at_forms', [$StartDateTime, $EndDateTime])
                     ->where('channel_id', '=', $request->channel_id)
                     ->where('email', '=', $request->email)
                     ->where('phone', '=', $request->phone)

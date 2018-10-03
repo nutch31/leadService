@@ -1,4 +1,13 @@
 <?php
+
+$request->created_at = "2018-10-03 11:50:30";
+
+echo $StartDateTime = date("Y-m-d H:i:s", (strtotime(date($request->created_at)) - 2));
+echo "<BR>";
+echo $EndDateTime = date("Y-m-d H:i:s", (strtotime(date($request->created_at)) + 2));
+
+die;
+
 $date = "2018-09-12 12:10:39";
 $heronumber = "022158279";
 $client_number = "0830479124";

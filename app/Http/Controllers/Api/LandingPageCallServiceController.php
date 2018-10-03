@@ -14,6 +14,7 @@ class LandingPageCallServiceController extends BaseController
         $Landingpagecallservice = new Landingpagecallservice;
         $Landingpagecallservice->response = $request;
         $Landingpagecallservice->status = 0;
+        $Landingpagecallservice->status_alpha = 0;
         $Landingpagecallservice->form_id_leadservice = 0;
         $Landingpagecallservice->save();
        
@@ -49,7 +50,7 @@ class LandingPageCallServiceController extends BaseController
             $data_json = json_encode($data_array);  
         }
 
-        $page_url = $request->get('page_url');            
+        $page_url = $request->get('page_url');             
         
         $count = Form::where('channel_id', '=', $channel_id)->where(function($query) use ($email, $phone_number)
         {
@@ -86,6 +87,47 @@ class LandingPageCallServiceController extends BaseController
             $Landingpagecallservice->status = 1;
             $Landingpagecallservice->form_id_leadservice = $form->id;
             $Landingpagecallservice->save();
+
+            //$this->call_alpha($channel_id, $name, $email, $phone_number, $data_json, $is_duplicated, $ip_address, $page_url, $Landingpagecallservice->id, $form->id);
         }        
+    }
+
+    public function call_alpha($channel_id, $name, $email, $phone_number, $data_json, $is_duplicated, $ip_address, $page_url, $Landingpagecallservice_id, $form_id)
+    {          
+        $arr = array(
+                     'channel_id' => $channel_id,
+                     'name' => $name, 
+                     'email' => $email, 
+                     'phone_number' => $phone_number, 
+                     'data_json' => $data_json, 
+                     'is_duplicated' => $is_duplicated, 
+                     'ip_address' => $ip_address, 
+                     'page_url' => $page_url,
+                     'form_id' => $form_id
+                    );
+        $val = json_encode($arr);
+
+        //$url = '';   // comment for using the url from database
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
+            
+        curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $val);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+            'Content-Type: application/json',                                                                                
+            'Content-Length: ' . strlen($val))
+        );     
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
+        curl_close($ch);
+
+        if($info==200 || $info==201)
+        {
+            $Landingpagecallservice = Landingpagecallservice::find($Landingpagecallservice_id);
+            $Landingpagecallservice->status_alpha = 1;
+            $Landingpagecallservice->save();
+        }
     }
 }

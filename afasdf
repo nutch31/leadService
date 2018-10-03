@@ -1,0 +1,35 @@
+[33mcommit 18dafd0eb19bb487b4c68c5f35f4393fddb29f38[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: Nut Chantathab <nut@heroleads.com>
+Date:   Tue Oct 2 12:06:59 2018 +0700
+
+    Fix Call Api Send StartEndDate & Close Call PBX
+
+[33mcommit 5d9c5c7b868e9c6846d116dc015872ba8d5b986f[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: Nut Chantathab <nut@heroleads.com>
+Date:   Tue Oct 2 10:01:14 2018 +0700
+
+    Fix Call & Form Webhook (call to herobase)
+
+[33mcommit a179d9a6482e68e56eb259e7c60c24d75cc9d41c[m
+Author: Nut Chantathab <nut@heroleads.com>
+Date:   Fri Sep 28 15:32:19 2018 +0700
+
+    Create Call Form Webhook & Adjust Call Form Controller Check Duplicate
+
+[33mcommit 7dcc13d42de7a31d7187693d4423dc8b864fd3e2[m
+Author: Nut Chantathab <nut@heroleads.com>
+Date:   Wed Sep 26 08:41:44 2018 +0700
+
+    API GET ALL LEADS CALL & FORM
+
+[33mcommit 20469f702db1860a0accde63857e501fb9b01fc6[m
+Author: Nut Chantathab <nut@heroleads.com>
+Date:   Fri Sep 21 16:04:18 2018 +0700
+
+    Fix bug AccountController
+
+[33mcommit 3c909537462539c1b093ee882ec336df4cfff619[m
+Author: Nut Chantathab <nut@heroleads.com>
+Date:   Fri Sep 21 14:39:54 2018 +0700
+
+    Get All Leads API & Push All Leads API

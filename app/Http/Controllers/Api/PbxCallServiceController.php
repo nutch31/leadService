@@ -24,6 +24,7 @@ class PbxCallServiceController extends BaseController
         $Pbxcallservice->response = $request;
         $Pbxcallservice->status = 0;
         $Pbxcallservice->status_pbx = 0;
+        $Pbxcallservice->status_alpha = 0;
         $Pbxcallservice->call_id_leadservice = 0;
         $Pbxcallservice->save();
                             
@@ -36,11 +37,15 @@ class PbxCallServiceController extends BaseController
         if(!isset($heronumber))
         {
             $heronumber = "";
+            $campaign_id = $request->get('campaign_id');
+            $campaign_name = $request->get('campaign_name');
         }
-            
-        $channel = Channel::where('tracking_phone', '=', $heronumber)->select('channel_id', 'name')->orderBy('id', 'desc')->first();
-        $campaign_id = $channel->channel_id;
-        $campaign_name = $channel->name;
+        else
+        {            
+            $channel = Channel::where('tracking_phone', '=', $heronumber)->select('channel_id', 'name')->orderBy('id', 'desc')->first();
+            $campaign_id = $channel->channel_id;
+            $campaign_name = $channel->name;
+        }
         
         $client_number  = $request->get('client_number');
         if(!isset($client_number))
@@ -145,6 +150,8 @@ class PbxCallServiceController extends BaseController
             $Pbxcallservice->status = 1;
             $Pbxcallservice->call_id_leadservice = $call->id;
             $Pbxcallservice->save();
+            
+            //$this->call_alpha($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice->id, $call->id);
         }    
     }
 
@@ -181,6 +188,44 @@ class PbxCallServiceController extends BaseController
         {
             $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
             $Pbxcallservice->status_pbx = 1;
+            $Pbxcallservice->save();
+        }
+    }
+
+    public function call_alpha($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice_id, $call_id)
+    {          
+        $arr = array(
+                     'timestamp' => $date, 
+                     'heronumber' => $heronumber, 
+                     'client_number' => $client_number, 
+                     'caller_id' => $phone, 
+                     'status' => $status_text, 
+                     'duration' => $duration, 
+                     'recording_url' => $recording_url,
+                     'call_id' => $call_id 
+                    );
+        $val = json_encode($arr);
+
+        //$url = '';   // comment for using the url from database
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
+            
+        curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $val);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+            'Content-Type: application/json',                                                                                
+            'Content-Length: ' . strlen($val))
+        );     
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
+        curl_close($ch);
+
+        if($info==200 || $info==201)
+        {
+            $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
+            $Pbxcallservice->status_alpha = 1;
             $Pbxcallservice->save();
         }
     }

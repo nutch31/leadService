@@ -10,6 +10,7 @@ class Landingpagecallservice extends Model
     protected $fillable = [
         'response', 
         'status',
+        'status_alpha',
         'form_id_leadservice',
         'created_at', 
         'updated_at'
