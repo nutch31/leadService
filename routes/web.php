@@ -46,6 +46,7 @@ $router->get('/getcalls/{DidPhone:[0-9]+}/getStartEndDate', 'Api\CallController@
 $router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\CallController@getCalls_DidPhone_CallerPhone_SubmitDateTime');
 $router->get('/getcalls/byPeriod/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate');
 $router->get('/getcalls/byPeriod/count/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Count');
+$router->get('/getcalls/byPeriod/unique/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Unique');
 $router->post('/postcall', 'Api\CallController@postCall');
 
 //Get Submit Form Leadservice
@@ -55,6 +56,7 @@ $router->get('/getforms/{analyticCampaignId:[0-9]+}/getStartEndDate', 'Api\FormC
 $router->get('/getforms/{analyticCampaignId:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_CallerPhone_SubmitDateTime');
 $router->get('/getforms/byPeriod/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime');
 $router->get('/getforms/byPeriod/count/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count');
+$router->get('/getforms/byPeriod/unique/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique');
 $router->post('/postform', 'Api\FormController@postForm');
 
 //Webhook PBX Call, Unbounce System

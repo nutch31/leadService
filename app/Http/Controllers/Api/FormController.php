@@ -97,6 +97,18 @@ class FormController extends BaseController
         return response($response, '200');
     }
 
+    public function getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique(Request $request)
+    {        
+        $request->StartDateTime = Carbon::parse($request->StartDateTime);
+        $request->StartDateTime->setTimezone($this->timezone);
+
+        $request->EndDateTime = Carbon::parse($request->EndDateTime);
+        $request->EndDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getForms_Unique($request);    
+        return response($response, '200');
+    }
+
     public function Response_getForms(Request $request)
     {
         $response = array();
@@ -180,7 +192,7 @@ class FormController extends BaseController
             $response['content'][$formKey]['landingPageCallEvent']['submitDateTime'] = "$submitDateTime";
 
             $response['content'][$formKey]['links'][0]['rel'] = "self";
-            $response['content'][$formKey]['links'][0]['href'] = "http://128.199.186.53/leadService/public/index.php/getforms/".$analyticCampaignId."/".$form->phone."/".$submitDateTime;
+            $response['content'][$formKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getforms/".$analyticCampaignId."/".$form->phone."/".$submitDateTime;
             $response['content'][$formKey]['links'][0]['hreflang'] = null;
             $response['content'][$formKey]['links'][0]['media'] = null;
             $response['content'][$formKey]['links'][0]['title'] = null;
@@ -217,6 +229,40 @@ class FormController extends BaseController
 
         $response['fromDateTime'] = "$StartDateTime";
         $response['totalCalls'] = "$count";
+        $response['analyticCampaignId'] = "$request->analyticCampaignId";
+        $response['toDateTime'] = "$EndDateTime";
+        
+        //$response = json_encode($response);
+        return $response;
+
+    }
+
+    public function Reponse_getForms_Unique(Request $request)
+    {
+        $response = array();
+
+        $analyticCampaignId_use = $request->analyticCampaignId;
+
+        $count = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->where(function($query) use ($analyticCampaignId_use)
+                    {
+                        $query->where('channels.adwords_campaign_id', '=', $analyticCampaignId_use)->orWhere('channels.facebook_campaign_id', '=', $analyticCampaignId_use);
+                    })                                  
+                    ->where('is_duplicated', '=', '0')      
+                    ->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime])
+                    ->count();    
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->StartDateTime);
+        //$dt->setTimezone($this->timezone);
+        $StartDateTime = $dt->format(DateTime::ISO8601);   
+            
+        $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $request->EndDateTime);
+        //$dt2->setTimezone($this->timezone);
+        $EndDateTime = $dt2->format(DateTime::ISO8601);   
+
+        $response['fromDateTime'] = "$StartDateTime";
+        $response['totalUniqueCalls'] = "$count";
         $response['analyticCampaignId'] = "$request->analyticCampaignId";
         $response['toDateTime'] = "$EndDateTime";
         

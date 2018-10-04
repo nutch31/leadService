@@ -103,6 +103,18 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    public function getCalls_DidPhone_StartDate_EndDate_Unique(Request $request)
+    {
+        $request->StartDateTime = Carbon::parse($request->StartDateTime);
+        $request->StartDateTime->setTimezone($this->timezone);
+
+        $request->EndDateTime = Carbon::parse($request->EndDateTime);
+        $request->EndDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getCalls_Unique($request);    
+        return response($response, '200');
+    }
+
     public function Reponse_getCalls(Request $request)
     {        
         $response = array();
@@ -166,7 +178,7 @@ class CallController extends BaseController
             $response['content'][$callKey]['pbxcallEvent']['submitDateTime'] = "$submitDateTime";
 
             $response['content'][$callKey]['links'][0]['rel'] = "self";
-            $response['content'][$callKey]['links'][0]['href'] = "http://128.199.186.53/leadService/public/index.php/getcalls/".$call->tracking_phone."/".$call->phone."/".$submitDateTime;
+            $response['content'][$callKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getcalls/".$call->tracking_phone."/".$call->phone."/".$submitDateTime;
             $response['content'][$callKey]['links'][0]['hreflang'] = null;
             $response['content'][$callKey]['links'][0]['media'] = null;
             $response['content'][$callKey]['links'][0]['title'] = null;
@@ -198,6 +210,34 @@ class CallController extends BaseController
 
         $response['fromDateTime'] = "$StartDateTime";
         $response['totalCalls'] = "$count";
+        $response['heroNumber'] = "$request->DidPhone";
+        $response['toDateTime'] = "$EndDateTime";
+        
+        //$response = json_encode($response);
+        return $response;
+    }
+
+    public function Reponse_getCalls_Unique(Request $request)
+    {
+        $response = array();
+
+        $count = DB::table('calls')
+                    ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+                    ->where('channels.tracking_phone', '=', $request->DidPhone)
+                    ->where('is_duplicated', '=', '0')
+                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime])
+                    ->count();    
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->StartDateTime);
+        //$dt->setTimezone($this->timezone);
+        $StartDateTime = $dt->format(DateTime::ISO8601);   
+            
+        $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $request->EndDateTime);
+        //$dt2->setTimezone($this->timezone);
+        $EndDateTime = $dt2->format(DateTime::ISO8601);   
+
+        $response['fromDateTime'] = "$StartDateTime";
+        $response['totalUniqueCalls'] = "$count";
         $response['heroNumber'] = "$request->DidPhone";
         $response['toDateTime'] = "$EndDateTime";
         
