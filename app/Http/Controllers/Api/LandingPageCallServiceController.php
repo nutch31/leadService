@@ -6,6 +6,7 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use App\Model\Landingpagecallservice;
 use App\Model\Form;
+use App\Model\Channel;
 
 class LandingPageCallServiceController extends BaseController
 {
@@ -50,9 +51,18 @@ class LandingPageCallServiceController extends BaseController
             $data_json = json_encode($data_array);  
         }
 
-        $page_url = $request->get('page_url');             
+        $page_url = $request->get('page_url');   
         
-        $count = Form::where('channel_id', '=', $channel_id)->where(function($query) use ($email, $phone_number)
+        $CampaignId = Channel::where('channel_id', '=', $channel_id)->select('campaign_id')->first();
+
+        $ChannelIds = Channel::where('campaign_id', '=', $CampaignId->campaign_id)->select('channel_id')->get(); 
+        $array_channels = [];
+        foreach($ChannelIds as $ChannelIdKey => $ChannelId)
+        {
+            $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
+        }
+                   
+        $count = Form::whereIn('channel_id', $array_channels)->where(function($query) use ($email, $phone_number)
         {
             $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);
         })->count();

@@ -98,11 +98,16 @@ class PbxCallServiceController extends BaseController
         
         //$this->call_herobase($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice->id);
 
-        $count = Call::where([
-            ['channel_id', '=', $campaign_id],
-            ['phone', '=', $phone]
-        ])->count();
+        $CampaignId = Channel::where('channel_id', '=', $campaign_id)->select('campaign_id')->first();
 
+        $ChannelIds = Channel::where('campaign_id', '=', $CampaignId->campaign_id)->select('channel_id')->get(); 
+        $array_channels = [];
+        foreach($ChannelIds as $ChannelIdKey => $ChannelId)
+        {
+            $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
+        }
+        
+        $count = Call::whereIn('channel_id', $array_channels)->where('phone', '=', $phone)->count();
         if($count == 0)
         {
             $is_duplicated = false;

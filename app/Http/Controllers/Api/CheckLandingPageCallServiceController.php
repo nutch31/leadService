@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use App\Model\Form;
+use App\Model\Channel;
 
 class CheckLandingPageCallServiceController extends BaseController
 {    
@@ -41,7 +43,30 @@ class CheckLandingPageCallServiceController extends BaseController
             $data_json = json_encode($data_array);  
         }
 
-        $page_url = $request->get('page_url');    
+        $page_url = $request->get('page_url');   
+        
+        $CampaignId = Channel::where('channel_id', '=', $channel_id)->select('campaign_id')->first();
+
+        $ChannelIds = Channel::where('campaign_id', '=', $CampaignId->campaign_id)->select('channel_id')->get(); 
+        $array_channels = [];
+        foreach($ChannelIds as $ChannelIdKey => $ChannelId)
+        {
+            $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
+        }
+
+        $count = Form::whereIn('channel_id', $array_channels)->where(function($query) use ($email, $phone_number)
+        {
+            $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);
+        })->count();
+
+        if($count == 0)
+        {
+            $is_duplicated = false;
+        }
+        else
+        {
+            $is_duplicated = true;
+        }
 
         $response = array(
             "channel_id" => $channel_id,
@@ -50,7 +75,8 @@ class CheckLandingPageCallServiceController extends BaseController
             "phone_number" => $phone_number,
             "ip_address" => $ip_address,
             "data_json" => $data_json,
-            "page_url" => $page_url
+            "page_url" => $page_url,
+            "is_duplicated" => $is_duplicated
         );
         
         return response($response, '200');
