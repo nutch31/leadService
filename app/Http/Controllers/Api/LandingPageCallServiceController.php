@@ -4,12 +4,20 @@ namespace App\Http\Controllers\Api;
 
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use DateTime;
 use App\Model\Landingpagecallservice;
 use App\Model\Form;
 use App\Model\Channel;
 
 class LandingPageCallServiceController extends BaseController
 {
+    public function __construct()
+    {
+        header('Content-Type: application/json;charset=UTF-8'); 
+        $this->timezone = 'GMT';
+    }
+
     public function LandingPageCallService(Request $request)
     {                        
         $Landingpagecallservice = new Landingpagecallservice;
@@ -97,27 +105,45 @@ class LandingPageCallServiceController extends BaseController
             $Landingpagecallservice->status = 1;
             $Landingpagecallservice->form_id_leadservice = $form->id;
             $Landingpagecallservice->save();
+            
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            //$this->call_alpha($channel_id, $name, $email, $phone_number, $data_json, $is_duplicated, $ip_address, $page_url, $Landingpagecallservice->id, $form->id);
+            $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id);
         }        
     }
 
-    public function call_alpha($channel_id, $name, $email, $phone_number, $data_json, $is_duplicated, $ip_address, $page_url, $Landingpagecallservice_id, $form_id)
-    {          
+    public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id)
+    {                  
+        $array_name = explode(" ", $name);
+        $count = count($array_name);
+
+        $first_name = $array_name[0];
+        $last_name = '';
+
+        for($a=1;$a<$count;$a++)
+        {
+            $last_name .= $array_name[$a].' ';
+        }
+
+        $last_name = substr($last_name, 0, -1);
+
         $arr = array(
-                     'channel_id' => $channel_id,
-                     'name' => $name, 
-                     'email' => $email, 
-                     'phone_number' => $phone_number, 
-                     'data_json' => $data_json, 
-                     'is_duplicated' => $is_duplicated, 
-                     'ip_address' => $ip_address, 
-                     'page_url' => $page_url,
-                     'form_id' => $form_id
+                     'type' => 'submitting',
+                     'data' => [
+                         '_id' => $form_id,
+                         'channel_id' => $channel_id,
+                         'first_name' => $first_name,
+                         'last_name' => $last_name,
+                         'tel' => $tel,
+                         'email' => $email,
+                         'submitted_date_time' => $submitted_date_time
+                     ]
                     );
         $val = json_encode($arr);
 
-        //$url = '';   // comment for using the url from database
+        $url = 'https://jenkins.heroleads.co.th/api/push-leads-data';   // comment for using the url from database
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
             

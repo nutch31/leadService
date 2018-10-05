@@ -5,10 +5,35 @@ namespace App\Http\Controllers\Api;
 use App\Model\Test;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+use DateTime;
 use DB;
 
 class TestController extends BaseController
 {
+    public function __construct()
+    {
+        header('Content-Type: application/json;charset=UTF-8'); 
+        $this->timezone = 'GMT';
+    }
+
+    public function test()
+    {
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', Date("Y-m-d H:i:s"));
+        $dt->setTimezone($this->timezone);
+        $submitted_date_time = $dt->format(DateTime::ISO8601); 
+
+        $arr = array(
+            'type' => 'submitting',
+            'data' => [
+                'submitted_date_time' => $submitted_date_time
+            ]
+           );
+        $val = json_encode($arr);
+
+        print_r($val);
+    }
+
     public function index()
     {
         return 'Index TestController';

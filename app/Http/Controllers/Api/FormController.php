@@ -192,7 +192,7 @@ class FormController extends BaseController
             $response['content'][$formKey]['landingPageCallEvent']['submitDateTime'] = "$submitDateTime";
 
             $response['content'][$formKey]['links'][0]['rel'] = "self";
-            $response['content'][$formKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getforms/".$analyticCampaignId."/".$form->phone."/".$submitDateTime;
+            $response['content'][$formKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getForms/".$analyticCampaignId."/".$form->phone."/".$submitDateTime;
             $response['content'][$formKey]['links'][0]['hreflang'] = null;
             $response['content'][$formKey]['links'][0]['media'] = null;
             $response['content'][$formKey]['links'][0]['title'] = null;

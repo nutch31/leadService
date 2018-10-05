@@ -178,7 +178,7 @@ class CallController extends BaseController
             $response['content'][$callKey]['pbxcallEvent']['submitDateTime'] = "$submitDateTime";
 
             $response['content'][$callKey]['links'][0]['rel'] = "self";
-            $response['content'][$callKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getcalls/".$call->tracking_phone."/".$call->phone."/".$submitDateTime;
+            $response['content'][$callKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getCalls/".$call->tracking_phone."/".$call->phone."/".$submitDateTime;
             $response['content'][$callKey]['links'][0]['hreflang'] = null;
             $response['content'][$callKey]['links'][0]['media'] = null;
             $response['content'][$callKey]['links'][0]['title'] = null;

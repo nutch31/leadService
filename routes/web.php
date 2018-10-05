@@ -27,6 +27,7 @@ $router->get('/get', 'Api\TestController@getItem');
 $router->post('/post', 'Api\TestController@postItem');
 $router->put('/put/{id}', 'Api\TestController@putItem');
 $router->delete('/delete/{id}', 'Api\TestController@deleteItem');
+$router->get('/test', 'Api\TestController@test');
 */
 
 //Herobase to Leadservice
@@ -39,24 +40,24 @@ $router->post('/postcampaign', 'Api\CampaignController@postCampaign');
 $router->post('/postchannel', 'Api\ChannelController@postChannel');
 
 //Get Calls Leadservice
-$router->get('/getcalls', 'Api\CallController@getCalls');
-$router->get('/getcalls/{DidPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone');
-$router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone_CallerPhone');
-$router->get('/getcalls/{DidPhone:[0-9]+}/getStartEndDate', 'Api\CallController@getCalls_DidPhone_getStartEndDate');
-$router->get('/getcalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\CallController@getCalls_DidPhone_CallerPhone_SubmitDateTime');
-$router->get('/getcalls/byPeriod/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate');
-$router->get('/getcalls/byPeriod/count/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Count');
-$router->get('/getcalls/byPeriod/unique/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Unique');
+$router->get('/getCalls', 'Api\CallController@getCalls');
+$router->get('/getCalls/{DidPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone');
+$router->get('/getCalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}', 'Api\CallController@getCalls_DidPhone_CallerPhone');
+$router->get('/getCalls/{DidPhone:[0-9]+}/getStartEndDate', 'Api\CallController@getCalls_DidPhone_getStartEndDate');
+$router->get('/getCalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\CallController@getCalls_DidPhone_CallerPhone_SubmitDateTime');
+$router->get('/getCalls/byPeriod/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate');
+$router->get('/getCalls/byPeriod/count/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Count');
+$router->get('/getCalls/byPeriod/unique/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Unique');
 $router->post('/postcall', 'Api\CallController@postCall');
 
 //Get Submit Form Leadservice
-$router->get('/getforms', 'Api\FormController@getForms');
-$router->get('/getforms/{analyticCampaignId:[0-9]+}', 'Api\FormController@getForms_AnalyticCampaignId');
-$router->get('/getforms/{analyticCampaignId:[0-9]+}/getStartEndDate', 'Api\FormController@getForms_AnalyticCampaignId_getStartEndDate');
-$router->get('/getforms/{analyticCampaignId:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_CallerPhone_SubmitDateTime');
-$router->get('/getforms/byPeriod/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime');
-$router->get('/getforms/byPeriod/count/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count');
-$router->get('/getforms/byPeriod/unique/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique');
+$router->get('/getForms', 'Api\FormController@getForms');
+$router->get('/getForms/{analyticCampaignId:[0-9]+}', 'Api\FormController@getForms_AnalyticCampaignId');
+$router->get('/getForms/{analyticCampaignId:[0-9]+}/getStartEndDate', 'Api\FormController@getForms_AnalyticCampaignId_getStartEndDate');
+$router->get('/getForms/{analyticCampaignId:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_CallerPhone_SubmitDateTime');
+$router->get('/getForms/byPeriod/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime');
+$router->get('/getForms/byPeriod/count/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count');
+$router->get('/getForms/byPeriod/unique/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique');
 $router->post('/postform', 'Api\FormController@postForm');
 
 //Webhook PBX Call, Unbounce System

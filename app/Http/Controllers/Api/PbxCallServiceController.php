@@ -156,7 +156,11 @@ class PbxCallServiceController extends BaseController
             $Pbxcallservice->call_id_leadservice = $call->id;
             $Pbxcallservice->save();
             
-            //$this->call_alpha($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice->id, $call->id);
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $date_leadservice);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
+            
+            $this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id);
         }    
     }
 
@@ -197,21 +201,32 @@ class PbxCallServiceController extends BaseController
         }
     }
 
-    public function call_alpha($date, $heronumber, $client_number, $phone, $status_text, $duration, $recording_url, $Pbxcallservice_id, $call_id)
-    {          
+    public function call_alpha($channel_id, $submitted_date_time, $caller_phone_number, $status, $call_direction, $recording_url, $Pbxcallservice_id, $call_id)
+    {   
+        if($status == 1)
+        {
+            $text = "ANSWER";
+        }
+        else 
+        {
+            $text = "MISSED CALL";
+        }       
+
         $arr = array(
-                     'timestamp' => $date, 
-                     'heronumber' => $heronumber, 
-                     'client_number' => $client_number, 
-                     'caller_id' => $phone, 
-                     'status' => $status_text, 
-                     'duration' => $duration, 
-                     'recording_url' => $recording_url,
-                     'call_id' => $call_id 
+                        'type' => 'phone',
+                        'data' => [
+                            '_id' => $call_id,
+                            'channel_id' => $channel_id,
+                            'submitted_date_time' => $submitted_date_time,
+                            'caller_phone_number' => $caller_phone_number,
+                            'status' => $text,
+                            'call_direction' => $call_direction,
+                            'recording_url' => $recording_url
+                        ]
                     );
         $val = json_encode($arr);
 
-        //$url = '';   // comment for using the url from database
+        $url = 'https://jenkins.heroleads.co.th/api/push-leads-data';   // comment for using the url from database
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
             
