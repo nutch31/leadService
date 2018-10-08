@@ -31,13 +31,13 @@ $router->get('/test', 'Api\TestController@test');
 */
 
 //Herobase to Leadservice
-$router->post('/postaccount', 'Api\AccountController@postAccount');
+$router->post('/postAccount', 'Api\AccountController@postAccount');
 
 //Herobase to Leadservice
-$router->post('/postcampaign', 'Api\CampaignController@postCampaign');
+$router->post('/postCampaign', 'Api\CampaignController@postCampaign');
 
 //Herobase to Leadservice
-$router->post('/postchannel', 'Api\ChannelController@postChannel');
+$router->post('/postChannel', 'Api\ChannelController@postChannel');
 
 //Get Calls Leadservice
 $router->get('/getCalls', 'Api\CallController@getCalls');
@@ -48,7 +48,7 @@ $router->get('/getCalls/{DidPhone:[0-9]+}/{CallerPhone:[0-9]+}/{SubmitDateTime}'
 $router->get('/getCalls/byPeriod/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate');
 $router->get('/getCalls/byPeriod/count/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Count');
 $router->get('/getCalls/byPeriod/unique/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Unique');
-$router->post('/postcall', 'Api\CallController@postCall');
+$router->post('/postCall', 'Api\CallController@postCall');
 
 //Get Submit Form Leadservice
 $router->get('/getForms', 'Api\FormController@getForms');
@@ -58,7 +58,7 @@ $router->get('/getForms/{analyticCampaignId:[0-9]+}/{CallerPhone:[0-9]+}/{Submit
 $router->get('/getForms/byPeriod/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime');
 $router->get('/getForms/byPeriod/count/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count');
 $router->get('/getForms/byPeriod/unique/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique');
-$router->post('/postform', 'Api\FormController@postForm');
+$router->post('/postForm', 'Api\FormController@postForm');
 
 //Webhook PBX Call, Unbounce System
 $router->post('/PbxCallService', 'Api\PbxCallServiceController@PbxCallService');

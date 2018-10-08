@@ -242,11 +242,11 @@ class PbxCallServiceController extends BaseController
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
-        if($info==200 || $info==201)
-        {
+        //if($info==200 || $info==201)
+        //{
             $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
             $Pbxcallservice->status_alpha = 1;
             $Pbxcallservice->save();
-        }
+        //}
     }
 }

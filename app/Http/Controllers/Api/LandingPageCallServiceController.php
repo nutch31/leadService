@@ -159,11 +159,11 @@ class LandingPageCallServiceController extends BaseController
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
-        if($info==200 || $info==201)
-        {
+        //if($info==200 || $info==201)
+        //{
             $Landingpagecallservice = Landingpagecallservice::find($Landingpagecallservice_id);
             $Landingpagecallservice->status_alpha = 1;
             $Landingpagecallservice->save();
-        }
+        //}
     }
 }
