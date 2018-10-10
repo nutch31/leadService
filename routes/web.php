@@ -68,3 +68,5 @@ $router->post('/LandingPageCallService', 'Api\LandingPageCallServiceController@L
 $router->post('/CheckPbxCallService', 'Api\CheckPbxCallServiceController@CheckPbxCallService');
 $router->get('/CheckLandingPageCallService', 'Api\CheckLandingPageCallServiceController@CheckLandingPageCallService');
 
+$router->post('/push-leads-data', 'Api\PushLeadsDataFromAlphaController@PushLeadsData');
+

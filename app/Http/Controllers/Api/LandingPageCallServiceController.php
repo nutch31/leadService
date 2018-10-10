@@ -130,7 +130,7 @@ class LandingPageCallServiceController extends BaseController
         $last_name = substr($last_name, 0, -1);
 
         $arr = array(
-                     'type' => 'submitting',
+                     'type' => 'submitted',
                      'data' => [
                          '_id' => $form_id,
                          'channel_id' => $channel_id,
