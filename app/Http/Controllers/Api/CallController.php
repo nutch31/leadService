@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use DateTime;
 use App\Model\Channel;
 use App\Model\Call;
@@ -103,6 +104,27 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    public function getCalls_DidPhone_StartDate_EndDate_Count_Daybyday(Request $request)
+    {
+        $array_StartDate = explode("+", $request->StartDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->EndDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->StartDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->StartDateTime, $request->EndDateTime);
+        $count = $request->count->count();
+
+        $response = $this->Reponse_getCalls_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
     public function getCalls_DidPhone_StartDate_EndDate_Unique(Request $request)
     {
         $request->StartDateTime = Carbon::parse($request->StartDateTime);
@@ -112,6 +134,27 @@ class CallController extends BaseController
         $request->EndDateTime->setTimezone($this->timezone);
         
         $response = $this->Reponse_getCalls_Unique($request);    
+        return response($response, '200');
+    }
+
+    public function getCalls_DidPhone_StartDate_EndDate_Unique_Daybyday(Request $request)
+    {
+        $array_StartDate = explode("+", $request->StartDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->EndDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->StartDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->StartDateTime, $request->EndDateTime);
+        $count = $request->count->count();
+        
+        $response = $this->Reponse_getCalls_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
         return response($response, '200');
     }
 
@@ -217,6 +260,64 @@ class CallController extends BaseController
         return $response;
     }
 
+    public function Reponse_getCalls_Count_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->StartDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $count_calls = DB::table('calls')
+            ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+            ->where('channels.tracking_phone', '=', $request->DidPhone)
+            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime])
+            ->count();
+                    
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalCalls'] = "$count_calls";
+            $response[$day]['heroNumber'] = "$request->DidPhone";
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
+    }
+
     public function Reponse_getCalls_Unique(Request $request)
     {
         $response = array();
@@ -241,6 +342,65 @@ class CallController extends BaseController
         $response['heroNumber'] = "$request->DidPhone";
         $response['toDateTime'] = "$EndDateTime";
         
+        //$response = json_encode($response);
+        return $response;
+    }
+
+    public function Reponse_getCalls_Unique_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->StartDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $count_calls = DB::table('calls')
+            ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+            ->where('channels.tracking_phone', '=', $request->DidPhone)
+            ->where('is_duplicated', '=', '0')
+            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime])
+            ->count();
+                    
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalUniqueCalls'] = "$count_calls";
+            $response[$day]['heroNumber'] = "$request->DidPhone";
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
         //$response = json_encode($response);
         return $response;
     }

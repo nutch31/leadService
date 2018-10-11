@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use DateTime;
 use App\Model\Channel;
 use App\Model\Form;
@@ -97,6 +98,27 @@ class FormController extends BaseController
         return response($response, '200');
     }
 
+    public function getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Count_Daybyday(Request $request)
+    {                
+        $array_StartDate = explode("+", $request->StartDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->EndDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->StartDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->StartDateTime, $request->EndDateTime);
+        $count = $request->count->count();
+        
+        $response = $this->Reponse_getForms_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
     public function getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique(Request $request)
     {        
         $request->StartDateTime = Carbon::parse($request->StartDateTime);
@@ -106,6 +128,27 @@ class FormController extends BaseController
         $request->EndDateTime->setTimezone($this->timezone);
         
         $response = $this->Reponse_getForms_Unique($request);    
+        return response($response, '200');
+    }
+
+    public function getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique_Daybyday(Request $request)
+    {        
+        $array_StartDate = explode("+", $request->StartDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->EndDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->StartDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->StartDateTime, $request->EndDateTime);
+        $count = $request->count->count();
+        
+        $response = $this->Reponse_getForms_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
         return response($response, '200');
     }
 
@@ -237,6 +280,69 @@ class FormController extends BaseController
 
     }
 
+    public function Reponse_getForms_Count_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->StartDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $analyticCampaignId_use = $request->analyticCampaignId;
+
+            $count_forms = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->where(function($query) use ($analyticCampaignId_use)
+                    {
+                        $query->where('channels.adwords_campaign_id', '=', $analyticCampaignId_use)->orWhere('channels.facebook_campaign_id', '=', $analyticCampaignId_use);
+                    })                    
+                    ->whereBetween('forms.created_at_forms', [$StartDateTime, $EndDateTime])
+                    ->count();    
+
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalCalls'] = "$count_forms";            
+            $response[$day]['analyticCampaignId'] = "$request->analyticCampaignId";
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
+    }
+
     public function Reponse_getForms_Unique(Request $request)
     {
         $response = array();
@@ -269,6 +375,70 @@ class FormController extends BaseController
         //$response = json_encode($response);
         return $response;
 
+    }
+    
+    public function Reponse_getForms_Unique_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {        
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->StartDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $analyticCampaignId_use = $request->analyticCampaignId;
+
+            $count_forms = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->where(function($query) use ($analyticCampaignId_use)
+                    {
+                        $query->where('channels.adwords_campaign_id', '=', $analyticCampaignId_use)->orWhere('channels.facebook_campaign_id', '=', $analyticCampaignId_use);
+                    })        
+                    ->where('is_duplicated', '=', '0')                 
+                    ->whereBetween('forms.created_at_forms', [$StartDateTime, $EndDateTime])
+                    ->count();    
+
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalUniqueCalls'] = "$count_forms";            
+            $response[$day]['analyticCampaignId'] = "$request->analyticCampaignId";
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
     }
 
     public function postForm(Request $request)
