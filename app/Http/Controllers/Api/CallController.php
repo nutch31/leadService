@@ -124,6 +124,28 @@ class CallController extends BaseController
         $response = $this->Reponse_getCalls_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
         return response($response, '200');
     }
+    
+    public function getCalls_DidPhone_MonthYear_Count_Daybyday(Request $request)
+    {
+        $timezone_StartDate = $request->TimeZone;
+        $timezone_EndDate = $request->TimeZone;
+
+        $StartDateTime = $request->Year."-".$request->Month."-01T00:00:00+".$timezone_StartDate;
+        $request->StartDateTime = $StartDateTime;
+
+        $dt = Carbon::parse($StartDateTime);
+        $count = $dt->daysInMonth;
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $EndDateTime = $request->Year."-".$request->Month."-".$count."T23:59:59+".$timezone_StartDate;
+        $request->EndDateTime = $EndDateTime;
+
+        $dt = Carbon::parse($EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $response = $this->Reponse_getCalls_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
 
     public function getCalls_DidPhone_StartDate_EndDate_Unique(Request $request)
     {
@@ -153,6 +175,28 @@ class CallController extends BaseController
 
         $request->count = CarbonPeriod::create($request->StartDateTime, $request->EndDateTime);
         $count = $request->count->count();
+        
+        $response = $this->Reponse_getCalls_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
+    public function getCalls_DidPhone_MonthYear_Unique_Daybyday(Request $request)
+    {
+        $timezone_StartDate = $request->TimeZone;
+        $timezone_EndDate = $request->TimeZone;
+
+        $StartDateTime = $request->Year."-".$request->Month."-01T00:00:00+".$timezone_StartDate;
+        $request->StartDateTime = $StartDateTime;
+
+        $dt = Carbon::parse($StartDateTime);
+        $count = $dt->daysInMonth;
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $EndDateTime = $request->Year."-".$request->Month."-".$count."T23:59:59+".$timezone_StartDate;
+        $request->EndDateTime = $EndDateTime;
+
+        $dt = Carbon::parse($EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
         
         $response = $this->Reponse_getCalls_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
         return response($response, '200');
