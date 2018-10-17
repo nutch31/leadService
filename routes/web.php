@@ -72,9 +72,17 @@ $router->post('/postForm', 'Api\FormController@postForm');
 $router->post('/PbxCallService', 'Api\PbxCallServiceController@PbxCallService');
 $router->post('/LandingPageCallService', 'Api\LandingPageCallServiceController@LandingPageCallService');
 
+//Pull Lead Data From LeadService to Alpha
+$router->get('/pullLeadsCalls/{DidPhone:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\PbxCallServiceController@PullLeadsCalls');
+$router->get('/pullLeadsForms/{analyticCampaignId:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\LandingPageCallServiceController@PullLeadsForms');
+
 //Check Data before PBX Call, Unbounce System
 $router->post('/CheckPbxCallService', 'Api\CheckPbxCallServiceController@CheckPbxCallService');
 $router->get('/CheckLandingPageCallService', 'Api\CheckLandingPageCallServiceController@CheckLandingPageCallService');
 
+//Push Lead Data From Alpha to LeadService
 $router->post('/push-leads-data', 'Api\PushLeadsDataFromAlphaController@PushLeadsData');
+
+
+
 

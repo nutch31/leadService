@@ -143,7 +143,9 @@ class LandingPageCallServiceController extends BaseController
                     );
         $val = json_encode($arr);
 
-        $url = 'https://jenkins.heroleads.co.th/api/push-leads-data';   // comment for using the url from database
+        $url = env("ALPHA_API");
+        $url .= "push-leads-data";
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
             
@@ -159,11 +161,42 @@ class LandingPageCallServiceController extends BaseController
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
-        //if($info==200 || $info==201)
-        //{
+        if(!is_null($Landingpagecallservice_id))
+        {
             $Landingpagecallservice = Landingpagecallservice::find($Landingpagecallservice_id);
             $Landingpagecallservice->status_alpha = 1;
             $Landingpagecallservice->save();
-        //}
+        }
+    }
+
+    public function PullLeadsForms(Request $request)
+    {   
+        $channel = Channel::where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId)->first();
+
+        $forms = Form::where('channel_id', '=', $channel->channel_id);
+        if(isset($request->StartDateTime) && isset($request->EndDateTime))
+        {                
+            $request->StartDateTime = Carbon::parse($request->StartDateTime);
+            $request->StartDateTime->setTimezone($this->timezone);
+
+            $request->EndDateTime = Carbon::parse($request->EndDateTime);
+            $request->EndDateTime->setTimezone($this->timezone);
+            
+            $forms = $forms->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime]);
+        }
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')->get();
+
+        foreach($forms as $form)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
+
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id);
+        }
+        
+        return response(array(
+            'Status' => 'Success'
+        ), '200');
     }
 }

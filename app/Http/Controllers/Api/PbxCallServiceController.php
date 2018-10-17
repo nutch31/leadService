@@ -225,8 +225,10 @@ class PbxCallServiceController extends BaseController
                         ]
                     );
         $val = json_encode($arr);
-
-        $url = 'https://jenkins.heroleads.co.th/api/push-leads-data';   // comment for using the url from database
+        
+        $url = env("ALPHA_API");
+        $url .= "push-leads-data";
+        
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
             
@@ -242,11 +244,42 @@ class PbxCallServiceController extends BaseController
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
-        //if($info==200 || $info==201)
-        //{
+        if(!is_null($Pbxcallservice_id))
+        {
             $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
             $Pbxcallservice->status_alpha = 1;
             $Pbxcallservice->save();
-        //}
+        }
+    }
+
+    public function PullLeadsCalls(Request $request)
+    {   
+        $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->first();
+        
+        $calls = Call::where('channel_id', '=', $channel->channel_id);
+        if(isset($request->StartDateTime) && isset($request->EndDateTime))
+        {                
+            $request->StartDateTime = Carbon::parse($request->StartDateTime);
+            $request->StartDateTime->setTimezone($this->timezone);
+
+            $request->EndDateTime = Carbon::parse($request->EndDateTime);
+            $request->EndDateTime->setTimezone($this->timezone);
+            
+            $calls = $calls->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime]);
+        }
+        $calls = $calls->orderBy('calls.date', 'asc')->get();
+
+        foreach($calls as $call)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $call->date);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);
+
+            $this->call_alpha($call->channel_id, $submitted_date_time, $call->phone, $call->status, "Incoming", $call->recording_url, Null, $call->id);
+        }
+        
+        return response(array(
+            'Status' => 'Success'
+        ), '200');
     }
 }
