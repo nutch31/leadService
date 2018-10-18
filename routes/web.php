@@ -28,6 +28,7 @@ $router->post('/post', 'Api\TestController@postItem');
 $router->put('/put/{id}', 'Api\TestController@putItem');
 $router->delete('/delete/{id}', 'Api\TestController@deleteItem');
 $router->get('/test', 'Api\TestController@test');
+$router->get('/pagination/{DidPhone:[0-9]+}', 'Api\TestController@pagination');
 */
 
 //Herobase to Leadservice

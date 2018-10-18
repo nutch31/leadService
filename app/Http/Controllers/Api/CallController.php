@@ -17,22 +17,59 @@ class CallController extends BaseController
     {
         header('Content-Type: application/json;charset=UTF-8'); 
         $this->timezone = 'GMT';
+        $this->limit = 99999999;
     }
 
     public function getCalls(Request $request)
     {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+        
         $response = $this->Reponse_getCalls($request); 
         return response($response, '200');
     }
 
     public function getCalls_DidPhone(Request $request)
     {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
         $response = $this->Reponse_getCalls($request);     
         return response($response, '200');
     }
 
     public function getCalls_DidPhone_CallerPhone(Request $request)
     {        
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
         $response = $this->Reponse_getCalls($request);      
         return response($response, '200');
     }
@@ -72,7 +109,9 @@ class CallController extends BaseController
     }
 
     public function getCalls_DidPhone_CallerPhone_SubmitDateTime(Request $request)
-    {   
+    {           
+        $request->limit = $this->limit;
+
         $request->SubmitDateTime = Carbon::parse($request->SubmitDateTime);
         $request->SubmitDateTime->setTimezone($this->timezone);
         
@@ -82,6 +121,18 @@ class CallController extends BaseController
 
     public function getCalls_DidPhone_StartDate_EndDate(Request $request)
     {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
         $request->StartDateTime = Carbon::parse($request->StartDateTime);
         $request->StartDateTime->setTimezone($this->timezone);
 
@@ -238,7 +289,37 @@ class CallController extends BaseController
         }
 
         $calls = $calls->orderBy('calls.date', 'asc')
-                        ->get();
+                        ->paginate($request->limit);
+                        
+        $response['paging']['count'] = $calls->count();
+        $response['paging']['currentPage'] = $calls->currentPage();
+        $response['paging']['firstItem'] = $calls->firstItem();
+        $response['paging']['hasMorePages'] = $calls->hasMorePages();
+        $response['paging']['lastItem'] = $calls->lastItem();
+        $response['paging']['lastPage'] = $calls->lastPage();
+                
+        if(!is_null($calls->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $calls->onFirstPage();
+        //$response['paging']['perPage'] = $calls->perPage();
+                
+        if(!is_null($calls->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $calls->total();
 
         foreach($calls as $callKey => $call)
         {                                

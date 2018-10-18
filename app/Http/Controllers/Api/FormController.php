@@ -17,16 +17,41 @@ class FormController extends BaseController
     {
         header('Content-Type: application/json;charset=UTF-8'); 
         $this->timezone = 'GMT';
+        $this->limit = 99999999;
     }
 
     public function getForms(Request $request)
     {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
         $response = $this->Response_getForms($request);
         return response($response, '200');
     }
 
     public function getForms_AnalyticCampaignId(Request $request)
     {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+        
         $response = $this->Response_getForms($request);
         return response($response, '200');
     }
@@ -67,6 +92,8 @@ class FormController extends BaseController
 
     public function getForms_AnalyticCampaignId_CallerPhone_SubmitDateTime(Request $request)
     {
+        $request->limit = $this->limit;
+        
         $request->SubmitDateTime = Carbon::parse($request->SubmitDateTime);
         $request->SubmitDateTime->setTimezone($this->timezone);
 
@@ -76,6 +103,18 @@ class FormController extends BaseController
 
     public function getForms_AnalyticCampaignId_StartDateTime_EndDateTime(Request $request)
     {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
         $request->StartDateTime = Carbon::parse($request->StartDateTime);
         $request->StartDateTime->setTimezone($this->timezone);
 
@@ -241,7 +280,38 @@ class FormController extends BaseController
             $forms = $forms->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime]);
         }
                     
-        $forms = $forms->orderBy('forms.created_at_forms', 'asc')->get();
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')
+                        ->paginate($request->limit);
+                                                
+        $response['paging']['count'] = $forms->count();
+        $response['paging']['currentPage'] = $forms->currentPage();
+        $response['paging']['firstItem'] = $forms->firstItem();
+        $response['paging']['hasMorePages'] = $forms->hasMorePages();
+        $response['paging']['lastItem'] = $forms->lastItem();
+        $response['paging']['lastPage'] = $forms->lastPage();
+                
+        if(!is_null($forms->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $forms->onFirstPage();
+        //$response['paging']['perPage'] = $forms->perPage();
+                
+        if(!is_null($forms->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $forms->total();
 
         foreach($forms as $formKey => $form)
         {                               
