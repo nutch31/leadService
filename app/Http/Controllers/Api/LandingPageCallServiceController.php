@@ -110,10 +110,11 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id);
+            //$this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id);
         }        
     }
 
+    /*
     public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id)
     {                  
         $array_name = explode(" ", $name);
@@ -168,7 +169,9 @@ class LandingPageCallServiceController extends BaseController
             $Landingpagecallservice->save();
         }
     }
+    */
 
+    /*
     public function PullLeadsForms(Request $request)
     {   
         $channel = Channel::where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId)->first();
@@ -199,4 +202,5 @@ class LandingPageCallServiceController extends BaseController
             'Status' => 'Success'
         ), '200');
     }
+    */
 }
