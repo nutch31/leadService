@@ -9,16 +9,15 @@ class Comment_form extends Model
     protected $table = "comment_forms";
     protected $fillable = [
         'form_id', 
-        'remark_id', 
-        'remark_value', 
-        'remark_type_of_action', 
-        'source_id', 
-        'source_value', 
-        'source_type_of_action', 
-        'status_id', 
-        'status_value', 
-        'status_type_of_action',
-        'data', 
+        'firstName',
+        'lastName',
+        'remarkId',
+        'remarkValue',
+        'reporterId',
+        'typeOfAction',
+        'sourceId',
+        'statusId',
+        'data',
         'created_at', 
         'updated_at'
     ];

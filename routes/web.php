@@ -69,6 +69,10 @@ $router->get('/getForms/byPeriod/unique/daybyday/{analyticCampaignId:[0-9]+}/{St
 $router->get('/getForms/byMonthYear/unique/daybyday/{analyticCampaignId:[0-9]+}/{Month:[0-9]+}/{Year:[0-9]+}/{TimeZone:[0-9]+}', 'Api\FormController@getForms_AnalyticCampaignId_MonthYear_Unique_Daybyday');
 $router->post('/postForm', 'Api\FormController@postForm');
 
+//Get Calls & Submit Form LeadService
+$router->get('/getCallsForms/byDidPhoneAnalyticCampaignId', 'Api\CallsFormsController@getCallsForms_byDidPhoneAnalyticCampaignId');
+$router->get('/getCallsForms/byPeriodDidPhoneAnalyticCampaignId', 'Api\CallsFormsController@getCallsForms_byPeriodDidPhoneAnalyticCampaignId');
+
 //Webhook PBX Call, Unbounce System
 $router->post('/PbxCallService', 'Api\PbxCallServiceController@PbxCallService');
 $router->post('/LandingPageCallService', 'Api\LandingPageCallServiceController@LandingPageCallService');

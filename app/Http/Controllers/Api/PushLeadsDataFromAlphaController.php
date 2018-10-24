@@ -23,13 +23,13 @@ class PushLeadsDataFromAlphaController extends BaseController
         
         $data = $request->get('data');
 
-        if(isset($data["_id"]))
+        if(isset($data["id"]))
         {
-            $_id = $data["_id"];
+            $id = $data["id"];
         }
         else
         {
-            $_id = "";
+            $id = "";
         }
         if(isset($data["firstName"]))
         {
@@ -48,94 +48,67 @@ class PushLeadsDataFromAlphaController extends BaseController
             $lastName = "";
         }
         
-        if(isset($data["remark"]["_id"]))
+        if(isset($data["remark"]["id"]))
         {
-            $remark_id = $data["remark"]["_id"];
+            $remarkId = $data["remark"]["id"];
         }
         else
         {
-            $remark_id = "";
+            $remarkId = "";
         }
         if(isset($data["remark"]["value"]))
         {
-            $remark_value = $data["remark"]["value"];
+            $remarkValue = $data["remark"]["value"];
         }
         else
         {
-            $remark_value = "";
+            $remarkValue = "";
         }
-        if(isset($data["remark"]["type_of_action"]))
+        if(isset($data["remark"]["reporterId"]))
         {
-            $remark_type_of_action = $data["remark"]["type_of_action"];
+            $reporterId = $data["remark"]["reporterId"];
         }
         else
         {
-            $remark_type_of_action = "";
+            $reporterId = "";
         }
-        if(isset($data["source"]["_id"]))
+        if(isset($data["remark"]["typeOfAction"]))
         {
-            $source_id = $data["source"]["_id"];
+            $typeOfAction = $data["remark"]["typeOfAction"];
         }
         else
         {
-            $source_id = "";
+            $typeOfAction = "";
         }
-        if(isset($data["source"]["value"]))
+        if(isset($data["sourceId"]))
         {
-            $source_value = $data["source"]["value"];
+            $sourceId = $data["sourceId"];
         }
         else
         {
-            $source_value = "";
+            $sourceId = "";
         }
-        if(isset($data["source"]["type_of_action"]))
+        if(isset($data["statusId"]))
         {
-            $source_type_of_action = $data["source"]["type_of_action"];
+            $statusId = $data["statusId"];
         }
         else
         {
-            $source_type_of_action = "";
-        }
-        if(isset($data["status"]["_id"]))
-        {
-            $status_id = $data["status"]["_id"];
-        }
-        else
-        {
-            $status_id = "";
-        }
-        if(isset($data["status"]["value"]))
-        {
-            $status_value = $data["status"]["value"];
-        }
-        else
-        {
-            $status_value = "";
-        }
-        if(isset($data["status"]["type_of_action"]))
-        {
-            $status_type_of_action = $data["status"]["type_of_action"];
-        }
-        else
-        {
-            $status_type_of_action = "";
-        }
+            $statusId = "";
+        }        
         
         if($type == "phone")
         {                                        
             $comment_call = Comment_call::create([
-                'call_id' => $_id, 
-                'first_name' => $firstName, 
-                'last_name' => $lastName, 
-                'remark_id' => $remark_id,
-                'remark_value' => $remark_value, 
-                'remark_type_of_action' => $remark_type_of_action, 
-                'source_id' => $source_id, 
-                'source_value' => $source_value,
-                'source_type_of_action' => $source_type_of_action,  
-                'status_id' => $status_id, 
-                'status_value' => $status_value, 
-                'status_type_of_action' => $status_type_of_action,
+                'call_id' => $id, 
+                'firstName' => $firstName, 
+                'lastName' => $lastName, 
+                'remarkId' => $remarkId,
+                'remarkValue' => $remarkValue, 
+                'reporterId' => $reporterId,
+                'typeOfAction' => $typeOfAction, 
+                'sourceId' => $sourceId, 
+                'statusId' => $statusId, 
                 'data' => $request
             ]);
 
@@ -144,16 +117,15 @@ class PushLeadsDataFromAlphaController extends BaseController
         else if($type == "submitted")
         {                        
             $comment_form = Comment_form::create([
-                'form_id' => $_id, 
-                'remark_id' => $remark_id,
-                'remark_value' => $remark_value, 
-                'remark_type_of_action' => $remark_type_of_action, 
-                'source_id' => $source_id, 
-                'source_value' => $source_value,
-                'source_type_of_action' => $source_type_of_action,  
-                'status_id' => $status_id, 
-                'status_value' => $status_value, 
-                'status_type_of_action' => $status_type_of_action,
+                'form_id' => $id, 
+                'firstName' => $firstName, 
+                'lastName' => $lastName, 
+                'remarkId' => $remarkId,
+                'remarkValue' => $remarkValue, 
+                'reporterId' => $reporterId,
+                'typeOfAction' => $typeOfAction, 
+                'sourceId' => $sourceId, 
+                'statusId' => $statusId, 
                 'data' => $request
             ]);
 
