@@ -160,7 +160,7 @@ class PbxCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
             
-            //$this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id);
+            $this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id);
         }    
     }
 
@@ -201,7 +201,7 @@ class PbxCallServiceController extends BaseController
         }
     }
 
-    /*
+    
     public function call_alpha($channel_id, $submitted_date_time, $caller_phone_number, $status, $call_direction, $recording_url, $Pbxcallservice_id, $call_id)
     {   
         if($status == 1)
@@ -247,14 +247,17 @@ class PbxCallServiceController extends BaseController
 
         if(!is_null($Pbxcallservice_id))
         {
-            $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
-            $Pbxcallservice->status_alpha = 1;
-            $Pbxcallservice->save();
+            if($info == "200" || $info == "201")
+            {
+                $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
+                $Pbxcallservice->status_alpha = 1;
+                $Pbxcallservice->save();
+            }
         }
     }
-    */
+    
 
-    /*
+    
     public function PullLeadsCalls(Request $request)
     {   
         $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->first();
@@ -285,5 +288,5 @@ class PbxCallServiceController extends BaseController
             'Status' => 'Success'
         ), '200');
     }
-    */
+    
 }
