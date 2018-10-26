@@ -243,7 +243,7 @@ class FormController extends BaseController
                     ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
                     ->select(
                         'channels.adwords_campaign_id', 'channels.facebook_campaign_id',
-                        'forms.id', 'forms.name', 'forms.email', 'forms.phone', 'forms.created_at_forms'
+                        'forms.id', 'forms.name', 'forms.email', 'forms.phone', 'forms.custom_attributes', 'forms.created_at_forms'
                     );
 
         if(isset($request->analyticCampaignId))
@@ -346,6 +346,7 @@ class FormController extends BaseController
             $response['content'][$formKey]['landingPageCallEvent']['lastName'] = "$lastName";
             $response['content'][$formKey]['landingPageCallEvent']['email'] = "$form->email";
             $response['content'][$formKey]['landingPageCallEvent']['phone'] = "$form->phone";
+            $response['content'][$formKey]['landingPageCallEvent']['custom_attributes'] = "$form->custom_attributes";
             $response['content'][$formKey]['landingPageCallEvent']['submitDateTime'] = "$submitDateTime";
 
             $response['content'][$formKey]['links'][0]['rel'] = "self";

@@ -210,7 +210,7 @@ class CallsFormsController extends BaseController
                 ->where('channels.channel_id', '=', $array_channel[$x])
                 ->select(
                     'channels.adwords_campaign_id', 'channels.facebook_campaign_id',
-                    'forms.channel_id', 'forms.id', 'forms.name', 'forms.email', 'forms.phone', 'forms.created_at_forms'
+                    'forms.channel_id', 'forms.id', 'forms.name', 'forms.email', 'forms.phone', 'forms.custom_attributes', 'forms.created_at_forms'
                 );
                 if(isset($request->startDateTime) && isset($request->endDateTime))
                 {
@@ -253,6 +253,7 @@ class CallsFormsController extends BaseController
                     $response['content'][$keys]['analyticCampaignId'] = "$analyticCampaignId";
                     $response['content'][$keys]['email'] = "$form->email";
                     $response['content'][$keys]['phone'] = "$form->phone";
+                    $response['content'][$keys]['custom_attributes'] = "$form->custom_attributes";
                     $response['content'][$keys]['submitDateTime'] = "$submitDateTime";
 
                     $count_comment_form = Comment_form::where('form_id', '=', $form->id)->count();
