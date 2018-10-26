@@ -80,13 +80,21 @@ class CallController extends BaseController
 
         $calls_minDate = DB::table('calls')
                     ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
-                    ->where('channels.tracking_phone', '=', $request->DidPhone)
-                    ->min('calls.date');
+                    ->where('channels.tracking_phone', '=', $request->DidPhone);
+        if(isset($request->status))
+        {
+            $calls_minDate = $calls_minDate->where('calls.status', '=', $request->status);
+        }
+        $calls_minDate = $calls_minDate->min('calls.date');
 
         $calls_maxDate = DB::table('calls')
                     ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
-                    ->where('channels.tracking_phone', '=', $request->DidPhone)
-                    ->max('calls.date');
+                    ->where('channels.tracking_phone', '=', $request->DidPhone);
+        if(isset($request->status))
+        {
+            $calls_maxDate = $calls_maxDate->where('calls.status', '=', $request->status);
+         }
+        $calls_maxDate = $calls_maxDate->max('calls.date');
         
         if(is_null($calls_minDate) || is_null($calls_maxDate))
         {   
@@ -287,6 +295,11 @@ class CallController extends BaseController
         {
             $calls = $calls->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime]);
         }
+        
+        if(isset($request->status))
+        {
+            $calls = $calls->where('calls.status', '=', $request->status);
+        }
 
         $calls = $calls->orderBy('calls.date', 'asc')
                         ->paginate($request->limit);
@@ -365,8 +378,12 @@ class CallController extends BaseController
         $count = DB::table('calls')
                     ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
                     ->where('channels.tracking_phone', '=', $request->DidPhone)
-                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime])
-                    ->count();    
+                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime]);
+        if(isset($request->status))
+        {
+            $count = $count->where('calls.status', '=', $request->status);
+        }
+        $count = $count->count();    
                     
         $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->StartDateTime);
         //$dt->setTimezone($this->timezone);
@@ -422,8 +439,12 @@ class CallController extends BaseController
             $count_calls = DB::table('calls')
             ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
             ->where('channels.tracking_phone', '=', $request->DidPhone)
-            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime])
-            ->count();
+            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime]);
+            if(isset($request->status))
+            {
+                $count_calls = $count_calls->where('calls.status', '=', $request->status);
+            }
+            $count_calls = $count_calls->count();
                     
             $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
             //$dt->setTimezone($this->timezone);
@@ -451,8 +472,12 @@ class CallController extends BaseController
                     ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
                     ->where('channels.tracking_phone', '=', $request->DidPhone)
                     ->where('is_duplicated', '=', '0')
-                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime])
-                    ->count();    
+                    ->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime]);
+        if(isset($request->status))
+        {
+            $count = $count->where('calls.status', '=', $request->status);
+        }
+        $count = $count->count();    
                     
         $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->StartDateTime);
         //$dt->setTimezone($this->timezone);
@@ -509,8 +534,12 @@ class CallController extends BaseController
             ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
             ->where('channels.tracking_phone', '=', $request->DidPhone)
             ->where('is_duplicated', '=', '0')
-            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime])
-            ->count();
+            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime]);
+            if(isset($request->status))
+            {
+                $count_calls = $count_calls->where('calls.status', '=', $request->status);
+            }
+            $count_calls = $count_calls->count();
                     
             $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
             //$dt->setTimezone($this->timezone);

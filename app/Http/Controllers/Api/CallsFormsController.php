@@ -113,6 +113,10 @@ class CallsFormsController extends BaseController
                 {
                     $calls = $calls->whereBetween('calls.date', [$request->startDateTime, $request->endDateTime]);
                 }
+                if(isset($request->status))
+                {
+                    $calls = $calls->where('calls.status', '=', $request->status);
+                }
 
                 $calls = $calls->orderBy('calls.date', 'asc')
                                 ->get();                                        
