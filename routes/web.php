@@ -72,6 +72,7 @@ $router->post('/postForm', 'Api\FormController@postForm');
 //Get Calls & Submit Form LeadService
 $router->get('/getCallsForms/byDidPhoneAnalyticCampaignId', 'Api\CallsFormsController@getCallsForms_byDidPhoneAnalyticCampaignId');
 $router->get('/getCallsForms/byPeriodDidPhoneAnalyticCampaignId', 'Api\CallsFormsController@getCallsForms_byPeriodDidPhoneAnalyticCampaignId');
+$router->get('/getCallsForms/summaryStatus/byPeriodDidPhoneAnalyticCampaignId', 'Api\CallsFormsController@getCallsForms_summaryStatus_byPeriodDidPhoneAnalyticCampaignId');
 
 //Webhook PBX Call, Unbounce System
 $router->post('/PbxCallService', 'Api\PbxCallServiceController@PbxCallService');
