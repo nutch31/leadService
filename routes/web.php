@@ -89,6 +89,8 @@ $router->get('/CheckLandingPageCallService', 'Api\CheckLandingPageCallServiceCon
 //Push Lead Data From Alpha to LeadService
 $router->post('/push-leads-data', 'Api\PushLeadsDataFromAlphaController@PushLeadsData');
 
+$router->get('/sendMail', 'Api\SendMailController@SendMail');
+
 
 
 
