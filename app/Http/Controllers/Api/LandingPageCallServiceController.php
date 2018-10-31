@@ -110,7 +110,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id);
+            //$this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id);
         }        
     }
 

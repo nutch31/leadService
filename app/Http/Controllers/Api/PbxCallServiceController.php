@@ -160,7 +160,7 @@ class PbxCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
             
-            $this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id);
+            //$this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id);
         }    
     }
 
