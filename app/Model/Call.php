@@ -15,6 +15,7 @@ class Call extends Model
         'status', 
         'phone', 
         'channel_id', 
+        'parent_id_duplicated',
         'is_duplicated', 
         'location',
         'created_at_calls', 

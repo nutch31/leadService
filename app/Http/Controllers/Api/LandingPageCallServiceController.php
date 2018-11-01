@@ -69,6 +69,8 @@ class LandingPageCallServiceController extends BaseController
         {
             $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
         }
+
+        $parent_id_duplicated = "";
                    
         $count = Form::whereIn('channel_id', $array_channels)->where(function($query) use ($email, $phone_number)
         {
@@ -82,6 +84,16 @@ class LandingPageCallServiceController extends BaseController
         else
         {
             $is_duplicated = true;
+
+            $parent_id_duplicated = Form::whereIn('channel_id', $array_channels)->where('is_duplicated', '=', '0')->where(function($query) use ($email, $phone_number)
+            {
+                $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);
+            })->select('id')->first();
+
+            if($parent_id_duplicated)            
+            {
+                $parent_id_duplicated = $parent_id_duplicated->id;
+            }
         }
         
         $form = Form::create([
@@ -92,6 +104,7 @@ class LandingPageCallServiceController extends BaseController
             'phone' => $phone_number, 
             'custom_attributes' => $data_json, 
             'is_duplicated' => $is_duplicated, 
+            'parent_id_duplicated' => $parent_id_duplicated,
             'ip' => $ip_address,
             'location' => '', 
             'created_at_forms' => date("Y-m-d H:i:s"), 

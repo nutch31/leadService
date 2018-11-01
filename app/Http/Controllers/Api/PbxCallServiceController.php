@@ -107,6 +107,8 @@ class PbxCallServiceController extends BaseController
             $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
         }
         
+        $parent_id_duplicated = "";
+
         $count = Call::whereIn('channel_id', $array_channels)->where('phone', '=', $phone)->count();
         if($count == 0)
         {
@@ -115,6 +117,13 @@ class PbxCallServiceController extends BaseController
         else
         {
             $is_duplicated = true;
+
+            $parent_id_duplicated = Call::whereIn('channel_id', $array_channels)->where('phone', '=', $phone)->where('is_duplicated', '=', '0')->select('id')->first();
+
+            if($parent_id_duplicated)            
+            {
+                $parent_id_duplicated = $parent_id_duplicated->id;
+            }
         }        
                 
         $timeArr = array_reverse(explode(":", $duration));
@@ -141,6 +150,7 @@ class PbxCallServiceController extends BaseController
             'phone' => $phone, 
             'channel_id' => $campaign_id, 
             'is_duplicated' => $is_duplicated,
+            'parent_id_duplicated' => $parent_id_duplicated,
             'location' => $location, 
             'created_at_calls' => date("Y-m-d H:i:s"), 
             'updated_at_calls' => date("Y-m-d H:i:s"), 

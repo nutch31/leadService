@@ -15,6 +15,7 @@ class Form extends Model
         'phone', 
         'custom_attributes', 
         'is_duplicated', 
+        'parent_id_duplicated',
         'ip', 
         'location', 
         'created_at_forms', 
