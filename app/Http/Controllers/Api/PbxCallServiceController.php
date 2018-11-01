@@ -170,7 +170,7 @@ class PbxCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
             
-            //$this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id);
+            $this->call_alpha($campaign_id, $submitted_date_time, $phone, $status, "Incoming", $recording_url, $Pbxcallservice->id, $call->id, $is_duplicated, $parent_id_duplicated, $seconds);
         }    
     }
 
@@ -212,7 +212,7 @@ class PbxCallServiceController extends BaseController
     }
 
     
-    public function call_alpha($channel_id, $submitted_date_time, $caller_phone_number, $status, $call_direction, $recording_url, $Pbxcallservice_id, $call_id)
+    public function call_alpha($channel_id, $submitted_date_time, $caller_phone_number, $status, $call_direction, $recording_url, $Pbxcallservice_id, $call_id, $is_duplicated, $parent_id_duplicated, $duration)
     {   
         if($status == 1)
         {
@@ -232,7 +232,10 @@ class PbxCallServiceController extends BaseController
                             'caller_phone_number' => $caller_phone_number,
                             'status' => $text,
                             'call_direction' => $call_direction,
-                            'recording_url' => $recording_url
+                            'recording_url' => $recording_url,
+                            'is_duplicated' => $is_duplicated,
+                            'parent_id_duplicated' => $parent_id_duplicated,
+                            'duration' => $duration
                         ]
                     );
         $val = json_encode($arr);
@@ -291,7 +294,7 @@ class PbxCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);
 
-            $this->call_alpha($call->channel_id, $submitted_date_time, $call->phone, $call->status, "Incoming", $call->recording_url, Null, $call->id);
+            $this->call_alpha($call->channel_id, $submitted_date_time, $call->phone, $call->status, "Incoming", $call->recording_url, Null, $call->id, $call->is_duplicated, $call->parent_id_duplicated, $call->duration);
         }
         
         return response(array(

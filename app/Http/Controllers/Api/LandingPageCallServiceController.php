@@ -123,13 +123,15 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            //$this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id);
+            $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id, $is_duplicated, $parent_id_duplicated, $data_json);
         }        
     }
 
     
-    public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id)
-    {                  
+    public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id, $is_duplicated, $parent_id_duplicated, $data_json)
+    {   
+        $data_array = json_decode($data_json, true);               
+
         $array_name = explode(" ", $name);
         $count = count($array_name);
 
@@ -152,7 +154,10 @@ class LandingPageCallServiceController extends BaseController
                          'last_name' => $last_name,
                          'tel' => $tel,
                          'email' => $email,
-                         'submitted_date_time' => $submitted_date_time
+                         'submitted_date_time' => $submitted_date_time,
+                         'is_duplicated' => $is_duplicated,
+                         'parent_id_duplicated' => $parent_id_duplicated,
+                         'content' => $data_array
                      ]
                     );
         $val = json_encode($arr);
@@ -211,7 +216,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id);
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes);
         }
         
         return response(array(
