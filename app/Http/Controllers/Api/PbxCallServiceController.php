@@ -109,7 +109,7 @@ class PbxCallServiceController extends BaseController
         
         $parent_id_duplicated = "";
 
-        $count = Call::whereIn('channel_id', $array_channels)->where('phone', '=', $phone)->count();
+        $count = Call::whereIn('channel_id', $array_channels)->where('phone', '=', $phone)->where('is_duplicated', '=', '0')->count();
         if($count == 0)
         {
             $is_duplicated = false;

@@ -72,7 +72,7 @@ class LandingPageCallServiceController extends BaseController
 
         $parent_id_duplicated = "";
                    
-        $count = Form::whereIn('channel_id', $array_channels)->where(function($query) use ($email, $phone_number)
+        $count = Form::whereIn('channel_id', $array_channels)->where('is_duplicated', '=', '0')->where(function($query) use ($email, $phone_number)
         {
             $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);
         })->count();
