@@ -86,6 +86,10 @@ $router->get('/pullLeadsForms/{analyticCampaignId:[0-9]+}[/{StartDateTime}[/{End
 $router->post('/CheckPbxCallService', 'Api\CheckPbxCallServiceController@CheckPbxCallService');
 $router->get('/CheckLandingPageCallService', 'Api\CheckLandingPageCallServiceController@CheckLandingPageCallService');
 
+//Update Data Calls Forms Table Field parent_id_duplicated
+$router->put('/updateParentIdDuplicatedCalls', 'Api\CallController@UpdateParentIdDuplicatedCalls');
+$router->put('/updateParentIdDuplicatedForms', 'Api\FormController@UpdateParentIdDuplicatedForms');
+
 //Push Lead Data From Alpha to LeadService
 $router->post('/push-leads-data', 'Api\PushLeadsDataFromAlphaController@PushLeadsData');
 

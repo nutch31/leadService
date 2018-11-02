@@ -74,7 +74,7 @@ class LandingPageCallServiceController extends BaseController
                    
         $count = Form::whereIn('channel_id', $array_channels)->where('is_duplicated', '=', '0')->where(function($query) use ($email, $phone_number)
         {
-            $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);
+            $query->where('email', '=', $email)->where('email', '!=', '')->orWhere('phone', '=', $phone_number)->where('phone', '!=', '');
         })->count();
 
         if($count == 0)
@@ -87,7 +87,7 @@ class LandingPageCallServiceController extends BaseController
 
             $parent_id_duplicated = Form::whereIn('channel_id', $array_channels)->where('is_duplicated', '=', '0')->where(function($query) use ($email, $phone_number)
             {
-                $query->where('email', '=', $email)->orWhere('phone', '=', $phone_number);
+                $query->where('email', '=', $email)->where('email', '!=', '')->orWhere('phone', '=', $phone_number)->where('phone', '!=', '');
             })->select('id')->first();
 
             if($parent_id_duplicated)            
@@ -130,6 +130,17 @@ class LandingPageCallServiceController extends BaseController
     
     public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id, $is_duplicated, $parent_id_duplicated, $data_json)
     {   
+        $Channel = Channel::where('channel_id', '=', $channel_id)->select('adwords_campaign_id', 'facebook_campaign_id')->first();
+
+        if(!empty($Channel->adwords_campaign_id))
+        {
+            $analytic_campaign_id = $Channel->adwords_campaign_id;
+        }
+        else
+        {
+            $analytic_campaign_id = $Channel->facebook_campaign_id;
+        }
+
         $data_array = json_decode($data_json, true);               
 
         $array_name = explode(" ", $name);
@@ -157,7 +168,8 @@ class LandingPageCallServiceController extends BaseController
                          'submitted_date_time' => $submitted_date_time,
                          'is_duplicated' => $is_duplicated,
                          'parent_id_duplicated' => $parent_id_duplicated,
-                         'content' => $data_array
+                         'content' => $data_array,
+                         'analytic_campaign_id' => $analytic_campaign_id
                      ]
                     );
         $val = json_encode($arr);

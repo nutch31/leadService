@@ -597,4 +597,79 @@ class CallController extends BaseController
             return response()->json('Call ID : '.$request->call_id. ' Duplicated', '409');
         }
     }
+    
+    public function UpdateParentIdDuplicatedCalls(Request $request)
+    {
+        $calls = DB::table('calls')
+                    ->select('id','channel_id','phone')
+                    ->orderBy('calls.id', 'asc')
+                    ->paginate($request->limit);
+                        
+        $response['paging']['count'] = $calls->count();
+        $response['paging']['currentPage'] = $calls->currentPage();
+        $response['paging']['firstItem'] = $calls->firstItem();
+        $response['paging']['hasMorePages'] = $calls->hasMorePages();
+        $response['paging']['lastItem'] = $calls->lastItem();
+        $response['paging']['lastPage'] = $calls->lastPage();
+                
+        if(!is_null($calls->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $calls->onFirstPage();
+        //$response['paging']['perPage'] = $calls->perPage();
+                
+        if(!is_null($calls->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $calls->total();
+
+        foreach($calls as $callKey => $call)
+        {   
+
+            $CampaignId = Channel::where('channel_id', '=', $call->channel_id)->select('campaign_id')->first();
+
+            $ChannelIds = Channel::where('campaign_id', '=', $CampaignId->campaign_id)->select('channel_id')->get(); 
+            $array_channels = [];
+            foreach($ChannelIds as $ChannelIdKey => $ChannelId)
+            {
+                $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
+            }
+                    
+            $count = Call::whereIn('channel_id', $array_channels)->where('id', '!=', $call->id)->where('id', '<', $call->id)->where('phone', '=', $call->phone)->count();
+
+            if($count > 0)
+            {
+                $parent_id_duplicated = Call::whereIn('channel_id', $array_channels)->where('id', '!=', $call->id)->where('id', '<', $call->id)->where('phone', '=', $call->phone)->orderBy('id', 'asc')->select('id')->first();
+                                     
+                //$call_update = Call::find($call->id);
+                //$call_update->is_duplicated = 1;
+                //$call_update->parent_id_duplicated = $parent_id_duplicated->id;
+                //$call_update->save();                
+            }
+            else
+            {
+                //$call_update = Call::find($call->id);
+                //$call_update->is_duplicated = 0;
+                //$call_update->parent_id_duplicated = '';
+                //$call_update->save();
+            } 
+                                        
+            $response['content'][$callKey]['PbxpageCallEvent']['rowId'] = "$call->id";
+            $response['content'][$callKey]['PbxpageCallEvent']['is_duplicated'] = "$call_update->is_duplicated";
+            $response['content'][$callKey]['PbxpageCallEvent']['parent_id_duplicated'] = "$call_update->parent_id_duplicated";
+        }        
+        return $response;
+    }
 }

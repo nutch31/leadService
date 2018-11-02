@@ -596,4 +596,87 @@ class FormController extends BaseController
             return response()->json('Form ID : '.$request->form_id. ' Duplicated', '409');
         }
     }
+    
+    public function UpdateParentIdDuplicatedForms(Request $request)
+    {
+        $forms = DB::table('forms')
+                    ->select('id','channel_id','phone','email')
+                    ->orderBy('forms.id', 'asc')
+                    ->paginate($request->limit);
+                        
+        $response['paging']['count'] = $forms->count();
+        $response['paging']['currentPage'] = $forms->currentPage();
+        $response['paging']['firstItem'] = $forms->firstItem();
+        $response['paging']['hasMorePages'] = $forms->hasMorePages();
+        $response['paging']['lastItem'] = $forms->lastItem();
+        $response['paging']['lastPage'] = $forms->lastPage();
+                
+        if(!is_null($forms->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $forms->onFirstPage();
+        //$response['paging']['perPage'] = $forms->perPage();
+                
+        if(!is_null($forms->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $forms->total();
+
+        foreach($forms as $formKey => $form)
+        {   
+            $email = $form->email;   
+            $phone_number = $form->phone;
+
+            $CampaignId = Channel::where('channel_id', '=', $form->channel_id)->select('campaign_id')->first();
+
+            $ChannelIds = Channel::where('campaign_id', '=', $CampaignId->campaign_id)->select('channel_id')->get(); 
+            $array_channels = [];
+            foreach($ChannelIds as $ChannelIdKey => $ChannelId)
+            {
+                $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
+            }
+                    
+            $count = Form::whereIn('channel_id', $array_channels)->where('id', '!=', $form->id)->where('id', '<', $form->id)->where(function($query) use ($email, $phone_number)
+            {
+                $query->where('email', '=', $email)->where('email', '!=', '')->orWhere('phone', '=', $phone_number)->where('phone', '!=', '');
+            })->count();
+
+            if($count > 0)
+            {
+                $parent_id_duplicated = Form::whereIn('channel_id', $array_channels)->where('id', '!=', $form->id)->where('id', '<', $form->id)->where(function($query) use ($email, $phone_number)
+                {
+                    $query->where('email', '=', $email)->where('email', '!=', '')->orWhere('phone', '=', $phone_number)->where('phone', '!=', '');
+                })->orderBy('id', 'asc')->select('id')->first();
+                                     
+                //$form_update = Form::find($form->id);
+                //$form_update->is_duplicated = 1;
+                //$form_update->parent_id_duplicated = $parent_id_duplicated->id;
+                //$form_update->save();                
+            }
+            else
+            {
+                //$form_update = Form::find($form->id);
+                //$form_update->is_duplicated = 0;
+                //$form_update->parent_id_duplicated = '';
+                //$form_update->save();
+            } 
+                                        
+            $response['content'][$formKey]['landingPageCallEvent']['rowId'] = "$form->id";
+            $response['content'][$formKey]['landingPageCallEvent']['is_duplicated'] = "$form_update->is_duplicated";
+            $response['content'][$formKey]['landingPageCallEvent']['parent_id_duplicated'] = "$form_update->parent_id_duplicated";
+        }        
+        return $response;
+    }    
 }
