@@ -15,6 +15,7 @@ class Comment_form extends Model
         'remarkValue',
         'reporterId',
         'typeOfAction',
+        'email',
         'sourceId',
         'statusId',
         'data',

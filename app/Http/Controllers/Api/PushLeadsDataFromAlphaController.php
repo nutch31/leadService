@@ -80,6 +80,14 @@ class PushLeadsDataFromAlphaController extends BaseController
         {
             $typeOfAction = "";
         }
+        if(isset($data["email"]))
+        {
+            $email = $data["email"];
+        }
+        else
+        {
+            $email = "";
+        }
         if(isset($data["sourceId"]))
         {
             $sourceId = $data["sourceId"];
@@ -106,7 +114,8 @@ class PushLeadsDataFromAlphaController extends BaseController
                 'remarkId' => $remarkId,
                 'remarkValue' => $remarkValue, 
                 'reporterId' => $reporterId,
-                'typeOfAction' => $typeOfAction, 
+                'typeOfAction' => $typeOfAction,  
+                'email' => $email,
                 'sourceId' => $sourceId, 
                 'statusId' => $statusId, 
                 'data' => $request
@@ -124,6 +133,7 @@ class PushLeadsDataFromAlphaController extends BaseController
                 'remarkValue' => $remarkValue, 
                 'reporterId' => $reporterId,
                 'typeOfAction' => $typeOfAction, 
+                'email' => $email,
                 'sourceId' => $sourceId, 
                 'statusId' => $statusId, 
                 'data' => $request

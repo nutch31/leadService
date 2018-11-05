@@ -156,6 +156,9 @@ class CallsFormsController extends BaseController
                         $lastName = $this->comment_call($call->id, 'lastName');
                         $response['content'][$keys]['lastName'] = "$lastName";
 
+                        $email = $this->comment_call($call->id, 'email');
+                        $response['content'][$keys]['email'] = "$email";
+
                         $sourceId = $this->comment_call($call->id, 'sourceId');
                         $response['content'][$keys]['sourceId'] = "$sourceId";
 
@@ -187,6 +190,7 @@ class CallsFormsController extends BaseController
                     {
                         $response['content'][$keys]['firstName'] = "";
                         $response['content'][$keys]['lastName'] = "";
+                        $response['content'][$keys]['email'] = "";
                         $response['content'][$keys]['sourceId'] = "";
                         $response['content'][$keys]['statusId'] = "";
                         $response['content'][$keys]['comment'] = array();
@@ -251,7 +255,6 @@ class CallsFormsController extends BaseController
                     $response['content'][$keys]['channelId'] = $form->channel_id;
                     $response['content'][$keys]['rowId'] = "$form->id";
                     $response['content'][$keys]['analyticCampaignId'] = "$analyticCampaignId";
-                    $response['content'][$keys]['email'] = "$form->email";
                     $response['content'][$keys]['phone'] = "$form->phone";
                     $response['content'][$keys]['custom_attributes'] = "$form->custom_attributes";
                     $response['content'][$keys]['submitDateTime'] = "$submitDateTime";
@@ -265,6 +268,9 @@ class CallsFormsController extends BaseController
 
                         $lastName = $this->comment_form($form->id, 'lastName');
                         $response['content'][$keys]['lastName'] = "$lastName";
+
+                        $email = $this->comment_form($form->id, 'email');
+                        $response['content'][$keys]['email'] = "$email";
 
                         $sourceId = $this->comment_form($form->id, 'sourceId');
                         $response['content'][$keys]['sourceId'] = "$sourceId";
@@ -297,6 +303,7 @@ class CallsFormsController extends BaseController
                     {
                         $response['content'][$keys]['firstName'] = $firstName;
                         $response['content'][$keys]['lastName'] = $lastName;
+                        $response['content'][$keys]['email'] = "$form->email";
                         $response['content'][$keys]['sourceId'] = "";
                         $response['content'][$keys]['statusId'] = "";                        
                         $response['content'][$keys]['comment'] = array();

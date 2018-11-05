@@ -15,6 +15,7 @@ class Comment_call extends Model
         'remarkValue',
         'reporterId',
         'typeOfAction',
+        'email',
         'sourceId',
         'statusId',
         'data',
