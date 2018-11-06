@@ -303,4 +303,81 @@ class PbxCallServiceController extends BaseController
         ), '200');
     }
     
+    public function PullAllLeadsCalls(Request $request)
+    {   
+        $response = array();
+
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+        
+        if(!isset($request->limit))
+        {
+            $request->limit = 1000;
+        }
+
+        $calls = \DB::table('calls')                    
+                    ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+                    ->select('calls.channel_id', 'calls.date', 'calls.phone', 'calls.status', 'calls.recording_url', 'calls.id', 'calls.is_duplicated', 'calls.parent_id_duplicated', 'calls.duration', 'channels.tracking_phone')
+                    ->whereIn('channels.status', ['active', 'deleted', 'paused'])
+                    ->orderBy('calls.id', 'Asc')
+                    ->paginate($request->limit);
+                        
+        $response['paging']['count'] = $calls->count();
+        $response['paging']['currentPage'] = $calls->currentPage();
+        $response['paging']['firstItem'] = $calls->firstItem();
+        $response['paging']['hasMorePages'] = $calls->hasMorePages();
+        $response['paging']['lastItem'] = $calls->lastItem();
+        $response['paging']['lastPage'] = $calls->lastPage();
+                
+        if(!is_null($calls->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $calls->onFirstPage();
+        //$response['paging']['perPage'] = $calls->perPage();
+                
+        if(!is_null($calls->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $calls->total();
+
+        foreach($calls as $callKey => $call)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $call->date);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);
+            
+            $response['content'][$callKey]['pbxcallEvent']['rowId'] = "$call->id";
+            $response['content'][$callKey]['pbxcallEvent']['channel_id'] = "$call->channel_id";
+            $response['content'][$callKey]['pbxcallEvent']['submitted_date_time'] = "$submitted_date_time";
+            $response['content'][$callKey]['pbxcallEvent']['phone'] = "$call->phone";
+            $response['content'][$callKey]['pbxcallEvent']['status'] = "$call->status";
+            $response['content'][$callKey]['pbxcallEvent']['Incoming'] = "Incoming";
+            $response['content'][$callKey]['pbxcallEvent']['recording_url'] = "$call->recording_url";
+            $response['content'][$callKey]['pbxcallEvent']['is_duplicated'] = "$call->is_duplicated";
+            $response['content'][$callKey]['pbxcallEvent']['parent_id_duplicated'] = "$call->parent_id_duplicated";
+            $response['content'][$callKey]['pbxcallEvent']['duration'] = "$call->duration";
+            $response['content'][$callKey]['pbxcallEvent']['tracking_phone'] = "$call->tracking_phone";
+
+            $this->call_alpha($call->channel_id, $submitted_date_time, $call->phone, $call->status, "Incoming", $call->recording_url, Null, $call->id, $call->is_duplicated, $call->parent_id_duplicated, $call->duration, $call->tracking_phone);
+        }
+        
+        return $response;
+    }
+    
 }

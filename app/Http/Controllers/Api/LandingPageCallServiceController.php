@@ -236,4 +236,79 @@ class LandingPageCallServiceController extends BaseController
         ), '200');
     }
     
+    public function PullAllLeadsForms(Request $request)
+    {   
+        $response = array();
+
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+        
+        if(!isset($request->limit))
+        {
+            $request->limit = 1000;
+        }
+
+        $forms = \DB::table('forms')                    
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->select('forms.channel_id', 'forms.created_at_forms', 'forms.name', 'forms.phone', 'forms.email', 'forms.id', 'forms.is_duplicated', 'forms.parent_id_duplicated', 'forms.custom_attributes')
+                    ->whereIn('channels.status', ['active', 'deleted', 'paused'])
+                    ->orderBy('forms.id', 'Asc')
+                    ->paginate($request->limit);
+                        
+        $response['paging']['count'] = $forms->count();
+        $response['paging']['currentPage'] = $forms->currentPage();
+        $response['paging']['firstItem'] = $forms->firstItem();
+        $response['paging']['hasMorePages'] = $forms->hasMorePages();
+        $response['paging']['lastItem'] = $forms->lastItem();
+        $response['paging']['lastPage'] = $forms->lastPage();
+                
+        if(!is_null($forms->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $forms->onFirstPage();
+        //$response['paging']['perPage'] = $forms->perPage();
+                
+        if(!is_null($forms->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $forms->total();
+
+        foreach($forms as $formKey => $form)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
+            
+            $response['content'][$formKey]['landingPageCallEvent']['rowId'] = "$form->id";
+            $response['content'][$formKey]['landingPageCallEvent']['channel_id'] = "$form->channel_id";
+            $response['content'][$formKey]['landingPageCallEvent']['name'] = "$form->name";
+            $response['content'][$formKey]['landingPageCallEvent']['phone'] = "$form->phone";
+            $response['content'][$formKey]['landingPageCallEvent']['email'] = "$form->email";
+            $response['content'][$formKey]['landingPageCallEvent']['submitted_date_time'] = "$submitted_date_time";
+            $response['content'][$formKey]['landingPageCallEvent']['is_duplicated'] = "$form->is_duplicated";
+            $response['content'][$formKey]['landingPageCallEvent']['parent_id_duplicated'] = "$form->parent_id_duplicated";
+            $response['content'][$formKey]['landingPageCallEvent']['custom_attributes'] = "$form->custom_attributes";
+
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes);
+        }
+        
+        return $response;
+    }
+    
 }
