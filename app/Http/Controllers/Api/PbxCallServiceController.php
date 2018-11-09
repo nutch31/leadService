@@ -261,13 +261,14 @@ class PbxCallServiceController extends BaseController
 
         if(!is_null($Pbxcallservice_id))
         {
+            $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
+            $Pbxcallservice->request_alpha = $val;
+            
             if($info == "200" || $info == "201")
             {
-                $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
                 $Pbxcallservice->status_alpha = 1;
-                $Pbxcallservice->request_alpha = $val;
-                $Pbxcallservice->save();
             }
+            $Pbxcallservice->save();
         }
     }
     
