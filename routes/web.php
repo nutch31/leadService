@@ -54,6 +54,7 @@ $router->get('/getCalls/byPeriod/unique/{DidPhone:[0-9]+}/{StartDateTime}/{EndDa
 $router->get('/getCalls/byPeriod/unique/daybyday/{DidPhone:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\CallController@getCalls_DidPhone_StartDate_EndDate_Unique_Daybyday');
 $router->get('/getCalls/byMonthYear/unique/daybyday/{DidPhone:[0-9]+}/{Month:[0-9]+}/{Year:[0-9]+}/{TimeZone:[0-9]+}', 'Api\CallController@getCalls_DidPhone_MonthYear_Unique_Daybyday');
 $router->post('/postCall', 'Api\CallController@postCall');
+$router->delete('/deleteCall/{id:[0-9]+}/{userId}', 'Api\CallController@deleteCall');
 
 //Get Submit Form Leadservice
 $router->get('/getForms', 'Api\FormController@getForms');
@@ -68,6 +69,7 @@ $router->get('/getForms/byPeriod/unique/{analyticCampaignId:[0-9]+}/{StartDateTi
 $router->get('/getForms/byPeriod/unique/daybyday/{analyticCampaignId:[0-9]+}/{StartDateTime}/{EndDateTime}', 'Api\FormController@getForms_AnalyticCampaignId_StartDateTime_EndDateTime_Unique_Daybyday');
 $router->get('/getForms/byMonthYear/unique/daybyday/{analyticCampaignId:[0-9]+}/{Month:[0-9]+}/{Year:[0-9]+}/{TimeZone:[0-9]+}', 'Api\FormController@getForms_AnalyticCampaignId_MonthYear_Unique_Daybyday');
 $router->post('/postForm', 'Api\FormController@postForm');
+$router->delete('/deleteForm/{id:[0-9]+}/{userId}', 'Api\FormController@deleteForm');
 
 //Get Calls & Submit Form LeadService
 $router->get('/getCallsForms/byDidPhoneAnalyticCampaignId', 'Api\CallsFormsController@getCallsForms_byDidPhoneAnalyticCampaignId');

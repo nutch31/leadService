@@ -672,4 +672,41 @@ class CallController extends BaseController
         }        
         return $response;
     }
+
+    public function deleteCall(Request $request)
+    {
+        $call = Call::findOrFail($request->id);
+                
+        $log_call = new \App\Model\Log_call;
+        
+        $log_call->call_id = $call->id;
+        $log_call->call_id_herobase = $call->call_id;
+        $log_call->date = $call->date;
+        $log_call->duration = $call->duration;
+        $log_call->recording_url = $call->recording_url;
+        $log_call->status = $call->status;
+        $log_call->phone = $call->phone;
+        $log_call->channel_id = $call->channel_id;
+        $log_call->is_duplicated = $call->is_duplicated;
+        $log_call->parent_id_duplicated = $call->parent_id_duplicated;
+        $log_call->location = $call->location;
+        $log_call->created_at_calls_herobase = $call->created_at_calls;
+        $log_call->updated_at_calls_herobase = $call->updated_at_calls;
+        $log_call->client_number = $call->client_number;
+        $log_call->call_uuid = $call->call_uuid;
+        $log_call->call_mapped = $call->call_mapped;
+        $log_call->created_at_calls = $call->created_at;
+        $log_call->updated_at_calls = $call->updated_at;
+        $log_call->user_id = $request->userId;
+
+        $log_call->save();
+
+        $call->delete();
+
+        $response["Result"] = "Success";
+        $response["Data"] = $call;
+        
+        
+        return response($response, '200');
+    }
 }

@@ -679,4 +679,38 @@ class FormController extends BaseController
         }        
         return $response;
     }    
+
+    public function deleteForm(Request $request)
+    {
+        $form = Form::findOrFail($request->id);
+                
+        $log_form = new \App\Model\Log_form;
+        
+        $log_form->form_id = $form->id;
+        $log_form->form_id_herobease = $form->form_id;
+        $log_form->channel_id = $form->channel_id;
+        $log_form->name = $form->name;
+        $log_form->email = $form->email;
+        $log_form->phone = $form->phone;
+        $log_form->custom_attributes = $form->custom_attributes;
+        $log_form->is_duplicated = $form->is_duplicated;
+        $log_form->parent_id_duplicated = $form->parent_id_duplicated;
+        $log_form->ip = $form->ip;
+        $log_form->location = $form->location;
+        $log_form->created_at_forms_herobase = $form->created_at_forms;
+        $log_form->updated_at_forms_herobase = $form->updated_at_forms;
+        $log_form->page_url = $form->page_url;
+        $log_form->created_at_forms = $form->created_at;
+        $log_form->updated_at_forms = $form->updated_at;
+        $log_form->user_id = $request->userId;
+
+        $log_form->save();
+        
+        $form->delete();
+
+        $response["Result"] = "Success";
+        $response["Data"] = $form;
+        
+        return response($response, '200');
+    }
 }
