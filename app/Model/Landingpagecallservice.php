@@ -11,6 +11,7 @@ class Landingpagecallservice extends Model
         'response', 
         'status',
         'status_alpha',
+        'request_alpha',
         'form_id_leadservice',
         'created_at', 
         'updated_at'

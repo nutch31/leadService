@@ -12,6 +12,7 @@ class pbxcallservice extends Model
         'status',
         'status_pbx',
         'status_alpha',
+        'request_alpha',
         'call_id_leadservice',
         'created_at', 
         'updated_at'

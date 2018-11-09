@@ -209,6 +209,7 @@ class LandingPageCallServiceController extends BaseController
             {
                 $Landingpagecallservice = Landingpagecallservice::find($Landingpagecallservice_id);
                 $Landingpagecallservice->status_alpha = 1;
+                $Landingpagecallservice->request_alpha = $val;
                 $Landingpagecallservice->save();
             }
         }

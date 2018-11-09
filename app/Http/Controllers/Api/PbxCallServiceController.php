@@ -265,6 +265,7 @@ class PbxCallServiceController extends BaseController
             {
                 $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
                 $Pbxcallservice->status_alpha = 1;
+                $Pbxcallservice->request_alpha = $val;
                 $Pbxcallservice->save();
             }
         }
