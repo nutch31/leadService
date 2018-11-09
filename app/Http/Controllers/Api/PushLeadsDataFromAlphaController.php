@@ -123,7 +123,7 @@ class PushLeadsDataFromAlphaController extends BaseController
 
             return response($comment_call, '200');  
         }
-        else if($type == "submitted")
+        else
         {                        
             $comment_form = Comment_form::create([
                 'form_id' => $id, 
