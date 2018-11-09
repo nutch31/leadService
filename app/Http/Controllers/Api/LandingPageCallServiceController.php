@@ -61,7 +61,8 @@ class LandingPageCallServiceController extends BaseController
 
         $page_url = $request->get('page_url');   
         
-        $CampaignId = Channel::where('channel_id', '=', $channel_id)->select('campaign_id')->first();
+        $CampaignId = Channel::where('channel_id', '=', $channel_id)->select('campaign_id', 'kind')->first();
+        $kind = $CampaignId->kind;
 
         $ChannelIds = Channel::where('campaign_id', '=', $CampaignId->campaign_id)->select('channel_id')->get(); 
         $array_channels = [];
@@ -123,12 +124,12 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id, $is_duplicated, $parent_id_duplicated, $data_json);
+            $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id, $is_duplicated, $parent_id_duplicated, $data_json, $kind);
         }        
     }
 
     
-    public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id, $is_duplicated, $parent_id_duplicated, $data_json)
+    public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id, $is_duplicated, $parent_id_duplicated, $data_json, $kind)
     {   
         $Channel = Channel::where('channel_id', '=', $channel_id)->select('adwords_campaign_id', 'facebook_campaign_id')->first();
 
@@ -139,6 +140,15 @@ class LandingPageCallServiceController extends BaseController
         else
         {
             $analytic_campaign_id = $Channel->facebook_campaign_id;
+        }
+
+        if($kind == "offline" && $analytic_campaign_id == "")
+        {
+            $type = "direct";
+        }
+        else
+        {
+            $type = "submitted";
         }
 
         $data_array = json_decode($data_json, true);               
@@ -157,7 +167,7 @@ class LandingPageCallServiceController extends BaseController
         $last_name = substr($last_name, 0, -1);
 
         $arr = array(
-                     'type' => 'submitted',
+                     'type' => $type,
                      'data' => [
                          '_id' => $form_id,
                          'channel_id' => $channel_id,
@@ -172,6 +182,7 @@ class LandingPageCallServiceController extends BaseController
                          'analytic_campaign_id' => $analytic_campaign_id
                      ]
                     );
+
         $val = json_encode($arr);
 
         $url = env("ALPHA_API");
@@ -228,7 +239,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes);
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
         }
         
         return response(array(
@@ -254,7 +265,7 @@ class LandingPageCallServiceController extends BaseController
 
         $forms = \DB::table('forms')                    
                     ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
-                    ->select('forms.channel_id', 'forms.created_at_forms', 'forms.name', 'forms.phone', 'forms.email', 'forms.id', 'forms.is_duplicated', 'forms.parent_id_duplicated', 'forms.custom_attributes')
+                    ->select('forms.channel_id', 'forms.created_at_forms', 'forms.name', 'forms.phone', 'forms.email', 'forms.id', 'forms.is_duplicated', 'forms.parent_id_duplicated', 'forms.custom_attributes', 'channels.kind')
                     ->whereIn('channels.status', ['active', 'deleted', 'paused'])
                     ->orderBy('forms.id', 'Asc')
                     ->paginate($request->limit);
@@ -304,8 +315,9 @@ class LandingPageCallServiceController extends BaseController
             $response['content'][$formKey]['landingPageCallEvent']['is_duplicated'] = "$form->is_duplicated";
             $response['content'][$formKey]['landingPageCallEvent']['parent_id_duplicated'] = "$form->parent_id_duplicated";
             $response['content'][$formKey]['landingPageCallEvent']['custom_attributes'] = "$form->custom_attributes";
+            $response['content'][$formKey]['landingPageCallEvent']['kind'] = "$form->kind";
 
-            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes);
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
         }
         
         return $response;
