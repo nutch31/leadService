@@ -12,7 +12,13 @@ use App\Model\Call;
 use DB;
 
 class CallController extends BaseController
-{
+{    
+    /**
+    * Config
+    *
+    * @param timezone = GMT
+    * @param limit = 99999999
+    */
     public function __construct()
     {
         header('Content-Type: application/json;charset=UTF-8'); 
@@ -20,12 +26,24 @@ class CallController extends BaseController
         $this->limit = 99999999;
     }
 
+    /**
+    * Get All Lead Calls
+    *
+    * @param optional page, limit, status
+    */
     public function getCalls(Request $request)
     {
         if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
         {
             return response(array(
                 'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
             ), '400');
         }
 
@@ -38,12 +56,25 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All Lead Calls by DidPhone
+    *
+    * @param request DidPhone
+    * @param oiptional page, limit, status
+    */
     public function getCalls_DidPhone(Request $request)
     {
         if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
         {
             return response(array(
                 'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
             ), '400');
         }
 
@@ -56,12 +87,25 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All Lead Calls by DidPhone, CallerPhone
+    *
+    * @param request DidPhone, CallerPhone
+    * @param oiptional page, limit, status
+    */
     public function getCalls_DidPhone_CallerPhone(Request $request)
     {        
         if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
         {
             return response(array(
                 'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
             ), '400');
         }
 
@@ -74,8 +118,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get StartDateTime, EndDateTime Calls by DidPhone
+    *
+    * @param request DidPhone
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_getStartEndDate(Request $request)
     {           
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
         $response = array();
 
         $calls_minDate = DB::table('calls')
@@ -116,6 +173,11 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All Lead Calls by DidPhone, CallerPhone, SubmitDateTime
+    *
+    * @param request DidPhone, CallerPhone, SubmitDateTime
+    */
     public function getCalls_DidPhone_CallerPhone_SubmitDateTime(Request $request)
     {           
         $request->limit = $this->limit;
@@ -127,12 +189,25 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All Lead Calls by DidPhone, StartDateTime, EndDateTime
+    *
+    * @param request DidPhone, StartDateTime, EndDateTime
+    * @param oiptional page, limit, status
+    */
     public function getCalls_DidPhone_StartDate_EndDate(Request $request)
     {
         if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
         {
             return response(array(
                 'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
             ), '400');
         }
 
@@ -151,8 +226,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get Count All Lead Calls by DidPhone, StartDateTime, EndDateTime
+    *
+    * @param request DidPhone, StartDateTime, EndDateTime
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_StartDate_EndDate_Count(Request $request)
     {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
         $request->StartDateTime = Carbon::parse($request->StartDateTime);
         $request->StartDateTime->setTimezone($this->timezone);
 
@@ -163,8 +251,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get Count All Lead Calls by DidPhone, StartDateTime, EndDateTime
+    *
+    * @param request DidPhone, StartDateTime, EndDateTime
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_StartDate_EndDate_Count_Daybyday(Request $request)
     {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+        
         $array_StartDate = explode("+", $request->StartDateTime);
         $timezone_StartDate = $array_StartDate[1];
 
@@ -184,8 +285,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
     
+    /**
+    * Get Count All Lead Calls by DidPhone, Month, Year, TimeZone
+    *
+    * @param request DidPhone, Month, Year, TimeZone
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_MonthYear_Count_Daybyday(Request $request)
     {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
         $timezone_StartDate = $request->TimeZone;
         $timezone_EndDate = $request->TimeZone;
 
@@ -206,8 +320,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get Count All unique Lead Calls by DidPhone, StartDateTime, EndDateTime
+    *
+    * @param request DidPhone, StartDateTime, EndDateTime
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_StartDate_EndDate_Unique(Request $request)
     {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
         $request->StartDateTime = Carbon::parse($request->StartDateTime);
         $request->StartDateTime->setTimezone($this->timezone);
 
@@ -218,8 +345,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get Count All unique Lead Calls by DidPhone, StartDateTime, EndDateTime
+    *
+    * @param request DidPhone, StartDateTime, EndDateTime
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_StartDate_EndDate_Unique_Daybyday(Request $request)
     {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
         $array_StartDate = explode("+", $request->StartDateTime);
         $timezone_StartDate = $array_StartDate[1];
 
@@ -239,8 +379,21 @@ class CallController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All unique Lead Calls by DidPhone, Month, Year, TimeZone
+    *
+    * @param request DidPhone, Month, Year, TimeZone
+    * @param oiptional status
+    */
     public function getCalls_DidPhone_MonthYear_Unique_Daybyday(Request $request)
     {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
         $timezone_StartDate = $request->TimeZone;
         $timezone_EndDate = $request->TimeZone;
 
@@ -673,6 +826,11 @@ class CallController extends BaseController
         return $response;
     }
 
+    /**
+    * Delete Lead Calls by id, userId
+    *
+    * @param request id, userId
+    */
     public function deleteCall(Request $request)
     {
         $call = Call::findOrFail($request->id);
@@ -708,5 +866,523 @@ class CallController extends BaseController
         
         
         return response($response, '200');
+    }
+    
+    /**
+    * Get All Lead Calls by DidPhone[]
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, page, limit, status
+    */
+    public function getCalls_DidPhoneArray(Request $request)
+    {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
+        $response = $this->Reponse_getCalls_DidPhoneArray($request);     
+        return response($response, '200');
+    }
+
+    /**
+    * Get All Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], page, limit, status
+    */
+    public function getCalls_DidPhoneArray_StartDate_EndDate(Request $request)
+    {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
+        $request->startDateTime = Carbon::parse($request->startDateTime);
+        $request->startDateTime->setTimezone($this->timezone);
+
+        $request->endDateTime = Carbon::parse($request->endDateTime);
+        $request->endDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getCalls_DidPhoneArray($request);       
+        return response($response, '200');
+    }
+    
+    /**
+    * Get Count All Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, status
+    */
+    public function getCalls_DidPhoneArray_StartDate_EndDate_Count(Request $request)
+    {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        $request->startDateTime = Carbon::parse($request->startDateTime);
+        $request->startDateTime->setTimezone($this->timezone);
+
+        $request->endDateTime = Carbon::parse($request->endDateTime);
+        $request->endDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getCalls_DidPhoneArray_Count($request);    
+        return response($response, '200');
+    }
+        
+    /**
+    * Get Count All Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, status
+    */
+    public function getCalls_DidPhoneArray_StartDate_EndDate_Count_Daybyday(Request $request)
+    {
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        $array_StartDate = explode("+", $request->startDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->endDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->startDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->endDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->startDateTime, $request->endDateTime);
+        $count = $request->count->count();
+
+        $response = $this->Reponse_getCalls_DidPhoneArray_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }        
+    
+    /**
+    * Get Count All Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, status
+    */
+    public function getCalls_DidPhoneArray_MonthYear_Count_Daybyday(Request $request)
+    {
+        
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        $timezone_StartDate = $request->TimeZone;
+        $timezone_EndDate = $request->TimeZone;
+
+        $StartDateTime = $request->Year."-".$request->Month."-01T00:00:00+".$timezone_StartDate;
+        $request->startDateTime = $StartDateTime;
+
+        $dt = Carbon::parse($StartDateTime);
+        $count = $dt->daysInMonth;
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $EndDateTime = $request->Year."-".$request->Month."-".$count."T23:59:59+".$timezone_StartDate;
+        $request->endDateTime = $EndDateTime;
+
+        $dt = Carbon::parse($EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $response = $this->Reponse_getCalls_DidPhoneArray_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+        
+    /**
+    * Get Count All unique Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, status
+    */
+    public function getCalls_DidPhoneArray_StartDate_EndDate_Unique(Request $request)
+    {        
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        $request->startDateTime = Carbon::parse($request->startDateTime);
+        $request->startDateTime->setTimezone($this->timezone);
+
+        $request->endDateTime = Carbon::parse($request->endDateTime);
+        $request->endDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getCalls_DidPhoneArray_Unique($request);    
+        return response($response, '200');
+    }
+
+    /**
+    * Get Count All unique Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, status
+    */
+    public function getCalls_DidPhoneArray_StartDate_EndDate_Unique_Daybyday(Request $request)
+    {        
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
+        }
+
+        $array_StartDate = explode("+", $request->startDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->endDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->startDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->endDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->startDateTime, $request->endDateTime);
+        $count = $request->count->count();
+        
+        $response = $this->Reponse_getCalls_DidPhoneArray_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+    
+    /**
+    * Get Count All unique Lead Calls by DidPhone[], StartDateTime, EndDateTime
+    *
+    * @param oiptional DidPhone[], StartDateTime, EndDateTime, status
+    */
+    public function getCalls_DidPhoneArray_MonthYear_Unique_Daybyday(Request $request)
+    {
+        $timezone_StartDate = $request->TimeZone;
+        $timezone_EndDate = $request->TimeZone;
+
+        $StartDateTime = $request->Year."-".$request->Month."-01T00:00:00+".$timezone_StartDate;
+        $request->startDateTime = $StartDateTime;
+
+        $dt = Carbon::parse($StartDateTime);
+        $count = $dt->daysInMonth;
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $EndDateTime = $request->Year."-".$request->Month."-".$count."T23:59:59+".$timezone_StartDate;
+        $request->endDateTime = $EndDateTime;
+
+        $dt = Carbon::parse($EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getCalls_DidPhoneArray_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
+    public function Reponse_getCalls_DidPhoneArray(Request $request)
+    {
+        $response = array();
+
+        $calls = DB::table('calls')
+                    ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+                    ->whereIn('channels.tracking_phone', $request->didPhone)
+                    ->select(
+                        'channels.tracking_phone', 
+                        'calls.id', 'calls.duration', 'calls.status', 'calls.recording_url', 'calls.phone', 'calls.date'
+                    );
+
+        if(isset($request->startDateTime) && isset($request->endDateTime))
+        {
+            $calls = $calls->whereBetween('calls.date', [$request->startDateTime, $request->endDateTime]);
+        }
+        
+        if(isset($request->status))
+        {
+            $calls = $calls->where('calls.status', '=', $request->status);
+        }
+
+        $calls = $calls->orderBy('calls.date', 'asc')
+                        ->paginate($request->limit);
+                        
+        $response['paging']['count'] = $calls->count();
+        $response['paging']['currentPage'] = $calls->currentPage();
+        $response['paging']['firstItem'] = $calls->firstItem();
+        $response['paging']['hasMorePages'] = $calls->hasMorePages();
+        $response['paging']['lastItem'] = $calls->lastItem();
+        $response['paging']['lastPage'] = $calls->lastPage();
+                
+        if(!is_null($calls->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $calls->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $calls->onFirstPage();
+        //$response['paging']['perPage'] = $calls->perPage();
+                
+        if(!is_null($calls->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $calls->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $calls->total();
+
+        foreach($calls as $callKey => $call)
+        {                                
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $call->date);
+            //$dt->setTimezone($this->timezone);
+            $submitDateTime = $dt->format(DateTime::ISO8601);   
+
+            if($call->status == 1)
+            {
+                $status = "ANSWER";
+            }
+            else
+            {
+                $status = "MISSED CALL";
+            }
+
+            $response['links'] = array();
+            $response['content'][$callKey]['pbxcallEvent']['rowId'] = "$call->id";
+            $response['content'][$callKey]['pbxcallEvent']['duration'] = "$call->duration";
+            $response['content'][$callKey]['pbxcallEvent']['status'] = "$status";
+            $response['content'][$callKey]['pbxcallEvent']['recordingUrl'] = "$call->recording_url";
+            $response['content'][$callKey]['pbxcallEvent']['heroNumber'] = "$call->tracking_phone";
+            $response['content'][$callKey]['pbxcallEvent']['callerId'] = "$call->phone";
+            $response['content'][$callKey]['pbxcallEvent']['submitDateTime'] = "$submitDateTime";
+
+            $response['content'][$callKey]['links'][0]['rel'] = "self";
+            $response['content'][$callKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getCalls/".$call->tracking_phone."/".$call->phone."/".$submitDateTime;
+            $response['content'][$callKey]['links'][0]['hreflang'] = null;
+            $response['content'][$callKey]['links'][0]['media'] = null;
+            $response['content'][$callKey]['links'][0]['title'] = null;
+            $response['content'][$callKey]['links'][0]['type'] = null;
+            $response['content'][$callKey]['links'][0]['deprecation'] = null;
+        }        
+
+        //$response = json_encode($response);
+        return $response;
+    }
+    
+    public function Reponse_getCalls_DidPhoneArray_Count(Request $request)
+    {
+        $response = array();
+
+        $count = DB::table('calls')
+                    ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+                    ->whereIn('channels.tracking_phone', $request->didPhone)
+                    ->whereBetween('calls.date', [$request->startDateTime, $request->endDateTime]);
+        if(isset($request->status))
+        {
+            $count = $count->where('calls.status', '=', $request->status);
+        }
+        $count = $count->count();    
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->startDateTime);
+        //$dt->setTimezone($this->timezone);
+        $StartDateTime = $dt->format(DateTime::ISO8601);   
+            
+        $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $request->endDateTime);
+        //$dt2->setTimezone($this->timezone);
+        $EndDateTime = $dt2->format(DateTime::ISO8601);   
+
+        $response['fromDateTime'] = "$StartDateTime";
+        $response['totalCalls'] = "$count";
+        $response['toDateTime'] = "$EndDateTime";
+        
+        //$response = json_encode($response);
+        return $response;
+    }
+
+    public function Reponse_getCalls_DidPhoneArray_Count_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->startDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $count_calls = DB::table('calls')
+            ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+            ->whereIn('channels.tracking_phone', $request->didPhone)
+            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime]);
+            if(isset($request->status))
+            {
+                $count_calls = $count_calls->where('calls.status', '=', $request->status);
+            }
+            $count_calls = $count_calls->count();
+                    
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalCalls'] = "$count_calls";
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
+    }
+    
+    public function Reponse_getCalls_DidPhoneArray_Unique(Request $request)
+    {
+        $response = array();
+
+        $count = DB::table('calls')
+                    ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+                    ->whereIn('channels.tracking_phone', $request->didPhone)
+                    ->where('is_duplicated', '=', '0')
+                    ->whereBetween('calls.date', [$request->startDateTime, $request->endDateTime]);
+        if(isset($request->status))
+        {
+            $count = $count->where('calls.status', '=', $request->status);
+        }
+        $count = $count->count();    
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->startDateTime);
+        //$dt->setTimezone($this->timezone);
+        $StartDateTime = $dt->format(DateTime::ISO8601);   
+            
+        $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $request->endDateTime);
+        //$dt2->setTimezone($this->timezone);
+        $EndDateTime = $dt2->format(DateTime::ISO8601);   
+
+        $response['fromDateTime'] = "$StartDateTime";
+        $response['totalUniqueCalls'] = "$count";
+        $response['toDateTime'] = "$EndDateTime";
+        
+        //$response = json_encode($response);
+        return $response;
+    }
+
+    public function Reponse_getCalls_DidPhoneArray_Unique_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->startDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $count_calls = DB::table('calls')
+            ->join('channels', 'channels.channel_id', '=', 'calls.channel_id')
+            ->whereIn('channels.tracking_phone', $request->didPhone)
+            ->where('is_duplicated', '=', '0')
+            ->whereBetween('calls.date', [$StartDateTime, $EndDateTime]);
+            if(isset($request->status))
+            {
+                $count_calls = $count_calls->where('calls.status', '=', $request->status);
+            }
+            $count_calls = $count_calls->count();
+                    
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalUniqueCalls'] = "$count_calls";
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
     }
 }

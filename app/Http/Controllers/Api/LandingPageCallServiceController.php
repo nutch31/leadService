@@ -215,9 +215,7 @@ class LandingPageCallServiceController extends BaseController
             
             $Landingpagecallservice->save();
         }
-    }
-    
-
+    }   
     
     public function PullLeadsForms(Request $request)
     {   
@@ -248,6 +246,36 @@ class LandingPageCallServiceController extends BaseController
         return response(array(
             'Status' => 'Success'
         ), '200');
+    }
+
+    public function PullLeadsForms_ChannelId(Request $request)
+    {   
+        $forms = Form::where('channel_id', '=', $request->channelId);
+        if(isset($request->StartDateTime) && isset($request->EndDateTime))
+        {                
+            $request->StartDateTime = Carbon::parse($request->StartDateTime);
+            $request->StartDateTime->setTimezone($this->timezone);
+
+            $request->EndDateTime = Carbon::parse($request->EndDateTime);
+            $request->EndDateTime->setTimezone($this->timezone);
+            
+            $forms = $forms->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime]);
+        }
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')->get();
+
+        foreach($forms as $form)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
+
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+        }
+                
+        return response(array(
+            'Status' => 'Success'
+        ), '200');
+
     }
     
     public function PullAllLeadsForms(Request $request)

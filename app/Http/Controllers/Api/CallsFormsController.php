@@ -30,6 +30,13 @@ class CallsFormsController extends BaseController
             return response(array(
                 'Message' => 'Please send parameter ?page=x&limit=y'
             ), '400');
+        }      
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
+            ), '400');
         }
             
         $response = $this->Response_getCallsForms($request); 
@@ -42,6 +49,13 @@ class CallsFormsController extends BaseController
         {
             return response(array(
                 'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }    
+
+        if(isset($request->status) && $request->status != 1 && $request->status != 2)
+        {
+            return response(array(
+                'Message' => 'Please send parameter status = 1(answered) or status = 2(miss call) only'
             ), '400');
         }
 
@@ -91,6 +105,22 @@ class CallsFormsController extends BaseController
                 {
                     $array_channel[$key] = $channels_analyticCampaignId->channel_id;
                     $array_type[$key] = "forms";
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('channel_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
+                    $array_type[$key] = "forms";  
                     $key++;
                 }
             }
@@ -239,6 +269,15 @@ class CallsFormsController extends BaseController
                         $analyticCampaignId = $form->facebook_campaign_id;
                     }
 
+                    if($analyticCampaignId == "")
+                    {
+                        $type = "direct";
+                    }
+                    else
+                    {
+                        $type = "submitted";
+                    }
+
                     $array_name = explode(" ", $form->name);
                     $firstName = $array_name[0];
                     $lastName = "";
@@ -251,7 +290,7 @@ class CallsFormsController extends BaseController
                     $lastName = substr($lastName, 0, -1);
                     
                     $response['links'] = array();
-                    $response['content'][$keys]['type'] = "submitted";
+                    $response['content'][$keys]['type'] = $type;
                     $response['content'][$keys]['channelId'] = $form->channel_id;
                     $response['content'][$keys]['rowId'] = "$form->id";
                     $response['content'][$keys]['analyticCampaignId'] = "$analyticCampaignId";
@@ -423,6 +462,22 @@ class CallsFormsController extends BaseController
                 foreach($channels_analyticCampaignIds as $channels_analyticCampaignId)
                 {
                     $array_channel[$key] = $channels_analyticCampaignId->channel_id;
+                    $array_type[$key] = "forms";
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('adwords_campaign_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
                     $array_type[$key] = "forms";
                     $key++;
                 }

@@ -13,6 +13,12 @@ use DB;
 
 class FormController extends BaseController
 {
+    /**
+    * Config
+    *
+    * @param timezone = GMT
+    * @param limit = 99999999
+    */
     public function __construct()
     {
         header('Content-Type: application/json;charset=UTF-8'); 
@@ -20,6 +26,11 @@ class FormController extends BaseController
         $this->limit = 99999999;
     }
 
+    /**
+    * Get All Lead Forms
+    *
+    * @param optional page, limit
+    */
     public function getForms(Request $request)
     {
         if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
@@ -38,6 +49,12 @@ class FormController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All Lead Forms by analyticCampaignId
+    *
+    * @param request analyticCampaignId
+    * @param optional page, limit
+    */
     public function getForms_AnalyticCampaignId(Request $request)
     {
         if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
@@ -56,6 +73,12 @@ class FormController extends BaseController
         return response($response, '200');
     }
 
+    /**
+    * Get All Lead Forms
+    *
+    * @param request analyticCampaignId
+    * @param optional page, limit
+    */
     public function getForms_AnalyticCampaignId_getStartEndDate(Request $request)
     {        
         $response = array();
@@ -712,5 +735,735 @@ class FormController extends BaseController
         $response["Data"] = $form;
         
         return response($response, '200');
+    }
+
+    //
+    public function getForms_AnalyticCampaignId_ChannelId(Request $request)
+    {            
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+        
+        $response = $this->Response_getForms_AnalyticCampaignId_ChannelId($request);
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_getStartEndDate(Request $request)
+    {          
+        $response = array();
+
+        $forms_minDate = DB::table('forms')                    
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->where('channels.channel_id', '=', $request->channelId)
+                    ->min('forms.created_at_forms');
+
+        $forms_maxDate = DB::table('forms')                    
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->where('channels.channel_id', '=', $request->channelId)
+                    ->max('forms.created_at_forms');                    
+        
+        if(is_null($forms_minDate) || is_null($forms_maxDate))
+        {   
+            return response('{"response":"Not Have Leads"}', '200');
+        }
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $forms_minDate);
+        //$dt->setTimezone($this->timezone);
+        $startDate = $dt->format(DateTime::ISO8601);   
+                            
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $forms_maxDate);
+        //$dt->setTimezone($this->timezone);
+        $endDate = $dt->format(DateTime::ISO8601);  
+
+        $response['startDate'] = "$startDate";
+        $response['endDate'] = "$endDate";
+                
+        //$response = json_encode($response);       
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_StartDateTime_EndDateTime(Request $request)
+    {
+        if(isset($request->page) && !isset($request->limit) || !isset($request->page) && isset($request->limit))
+        {
+            return response(array(
+                'Message' => 'Please send parameter ?page=x&limit=y'
+            ), '400');
+        }
+
+        if(!isset($request->limit))
+        {
+            $request->limit = $this->limit;
+        }
+
+        $request->startDateTime = Carbon::parse($request->startDateTime);
+        $request->startDateTime->setTimezone($this->timezone);
+
+        $request->endDateTime = Carbon::parse($request->endDateTime);
+        $request->endDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Response_getForms_AnalyticCampaignId_ChannelId($request);       
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_StartDateTime_EndDateTime_Count(Request $request)
+    {        
+        $request->startDateTime = Carbon::parse($request->startDateTime);
+        $request->startDateTime->setTimezone($this->timezone);
+
+        $request->endDateTime = Carbon::parse($request->endDateTime);
+        $request->endDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Response_getForms_AnalyticCampaignId_ChannelId_Count($request);    
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_StartDateTime_EndDateTime_Count_Daybyday(Request $request)
+    {        
+        $array_StartDate = explode("+", $request->startDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->endDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->startDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->endDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->startDateTime, $request->endDateTime);
+        $count = $request->count->count();
+        
+        $response = $this->Reponse_getForms_AnalyticCampaignId_ChannelId_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_MonthYear_Count_Daybyday(Request $request)
+    {        
+        $timezone_StartDate = $request->TimeZone;
+        $timezone_EndDate = $request->TimeZone;
+
+        $StartDateTime = $request->Year."-".$request->Month."-01T00:00:00+".$timezone_StartDate;
+        $request->startDateTime = $StartDateTime;
+
+        $dt = Carbon::parse($StartDateTime);
+        $count = $dt->daysInMonth;
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $EndDateTime = $request->Year."-".$request->Month."-".$count."T23:59:59+".$timezone_StartDate;
+        $request->endDateTime = $EndDateTime;
+
+        $dt = Carbon::parse($EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getForms_AnalyticCampaignId_ChannelId_Count_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+    
+    public function getForms_channelId_StartDateTime_EndDateTime_Unique(Request $request)
+    {        
+        $request->startDateTime = Carbon::parse($request->startDateTime);
+        $request->startDateTime->setTimezone($this->timezone);
+
+        $request->endDateTime = Carbon::parse($request->endDateTime);
+        $request->endDateTime->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getForms_AnalyticCampaignId_ChannelId_Unique($request);    
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_StartDateTime_EndDateTime_Unique_Daybyday(Request $request)
+    {        
+        $array_StartDate = explode("+", $request->startDateTime);
+        $timezone_StartDate = $array_StartDate[1];
+
+        $array_EndDate = explode("+", $request->endDateTime);
+        $timezone_EndDate = $array_EndDate[1];
+
+        $dt = Carbon::parse($request->startDateTime);
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $dt = Carbon::parse($request->endDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+
+        $request->count = CarbonPeriod::create($request->startDateTime, $request->endDateTime);
+        $count = $request->count->count();
+        
+        $response = $this->Reponse_getForms_AnalyticCampaignId_ChannelId_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_MonthYear_Unique_Daybyday(Request $request)
+    {    
+        $timezone_StartDate = $request->TimeZone;
+        $timezone_EndDate = $request->TimeZone;
+
+        $StartDateTime = $request->Year."-".$request->Month."-01T00:00:00+".$timezone_StartDate;
+        $request->startDateTime = $StartDateTime;
+
+        $dt = Carbon::parse($StartDateTime);
+        $count = $dt->daysInMonth;
+        $StartDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $EndDateTime = $request->Year."-".$request->Month."-".$count."T23:59:59+".$timezone_StartDate;
+        $request->endDateTime = $EndDateTime;
+
+        $dt = Carbon::parse($EndDateTime);
+        $EndDateTime_Convert = $dt->setTimezone($this->timezone);
+        
+        $response = $this->Reponse_getForms_AnalyticCampaignId_ChannelId_Unique_Daybyday($request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count);    
+        return response($response, '200');
+    }
+
+    public function getForms_channelId_CallerPhone_SubmitDateTime(Request $request)
+    {        
+        $request->limit = $this->limit;
+        
+        $request->SubmitDateTime = Carbon::parse($request->SubmitDateTime);
+        $request->SubmitDateTime->setTimezone($this->timezone);
+
+        $response = $this->Response_getForms_channelId_CallerPhone_SubmitDateTime($request);
+        return response($response, '200');                         
+    }
+
+    public function Response_getForms_channelId_CallerPhone_SubmitDateTime($request)
+    {
+        $response = array();
+
+        $forms = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->where('channels.channel_id', '=', $request->channelId)
+                    ->where('forms.phone', '=', $request->CallerPhone)
+                    ->where('forms.created_at_forms', '=', $request->SubmitDateTime)
+                    ->select(
+                        'channels.adwords_campaign_id', 'channels.facebook_campaign_id', 'channels.channel_id',
+                        'forms.id', 'forms.name', 'forms.email', 'forms.phone', 'forms.channel_id', 'forms.custom_attributes', 'forms.created_at_forms'
+                    )
+                    ->orderBy('forms.created_at_forms', 'asc')
+                    ->paginate($request->limit);
+                                                
+        $response['paging']['count'] = $forms->count();
+        $response['paging']['currentPage'] = $forms->currentPage();
+        $response['paging']['firstItem'] = $forms->firstItem();
+        $response['paging']['hasMorePages'] = $forms->hasMorePages();
+        $response['paging']['lastItem'] = $forms->lastItem();
+        $response['paging']['lastPage'] = $forms->lastPage();
+                
+        if(!is_null($forms->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $forms->onFirstPage();
+        //$response['paging']['perPage'] = $forms->perPage();
+                
+        if(!is_null($forms->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $forms->total();
+
+        foreach($forms as $formKey => $form)
+        {                               
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            //$dt->setTimezone('GMT');
+            $submitDateTime = $dt->format(DateTime::ISO8601);   
+
+            if(trim($form->adwords_campaign_id) != "")
+            {
+                $analyticCampaignId = $form->adwords_campaign_id;
+            }
+            else
+            {
+                $analyticCampaignId = $form->facebook_campaign_id;
+            }
+
+            $array_name = explode(" ", $form->name);
+            $firstName = $array_name[0];
+            $lastName = "";
+
+            for($x=1;$x<count($array_name);$x++)
+            {
+                $lastName.= $array_name[$x].' ';
+            }
+
+            $lastName = substr($lastName, 0, -1);
+            
+            $response['links'] = array();
+            $response['content'][$formKey]['landingPageCallEvent']['rowId'] = "$form->id";
+            $response['content'][$formKey]['landingPageCallEvent']['analyticCampaignId'] = "$analyticCampaignId";
+            $response['content'][$formKey]['landingPageCallEvent']['channelId'] = "$form->channel_id";
+            $response['content'][$formKey]['landingPageCallEvent']['firstName'] = "$firstName";
+            $response['content'][$formKey]['landingPageCallEvent']['lastName'] = "$lastName";
+            $response['content'][$formKey]['landingPageCallEvent']['email'] = "$form->email";
+            $response['content'][$formKey]['landingPageCallEvent']['phone'] = "$form->phone";
+            $response['content'][$formKey]['landingPageCallEvent']['custom_attributes'] = "$form->custom_attributes";
+            $response['content'][$formKey]['landingPageCallEvent']['submitDateTime'] = "$submitDateTime";
+
+            $response['content'][$formKey]['links'][0]['rel'] = "self";                
+            $response['content'][$formKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getForms2/".$form->channel_id."/".$form->phone."/".$submitDateTime;
+            $response['content'][$formKey]['links'][0]['hreflang'] = null;
+            $response['content'][$formKey]['links'][0]['media'] = null;
+            $response['content'][$formKey]['links'][0]['title'] = null;
+            $response['content'][$formKey]['links'][0]['type'] = null;
+            $response['content'][$formKey]['links'][0]['deprecation'] = null;
+        }
+        
+        //$response = json_encode($response);
+        return $response;         
+    }
+
+    public function Response_getForms_AnalyticCampaignId_ChannelId(Request $request)
+    {
+        $array_channel = array(); 
+        $key = 0;
+
+        if(isset($request->analyticCampaignId))
+        {
+            $count_analyticCampaignId = count($request->analyticCampaignId);
+            if($count_analyticCampaignId > 0)
+            {
+                $channels_analyticCampaignIds = Channel::whereIn('adwords_campaign_id', $request->analyticCampaignId)->orWhereIn('facebook_campaign_id', $request->analyticCampaignId)->get();
+                
+                foreach($channels_analyticCampaignIds as $channels_analyticCampaignId)
+                {
+                    $array_channel[$key] = $channels_analyticCampaignId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('channel_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        $response = array();
+
+        $forms = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->whereIn('channels.channel_id', $array_channel)
+                    ->select(
+                        'channels.adwords_campaign_id', 'channels.facebook_campaign_id', 'channels.channel_id',
+                        'forms.id', 'forms.name', 'forms.email', 'forms.phone', 'forms.channel_id', 'forms.custom_attributes', 'forms.created_at_forms'
+                    );
+
+        if(isset($request->startDateTime) && isset($request->endDateTime))
+        {
+            $forms = $forms->whereBetween('forms.created_at_forms', [$request->startDateTime, $request->endDateTime]);
+        }
+                    
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')
+                        ->paginate($request->limit);
+                                                
+        $response['paging']['count'] = $forms->count();
+        $response['paging']['currentPage'] = $forms->currentPage();
+        $response['paging']['firstItem'] = $forms->firstItem();
+        $response['paging']['hasMorePages'] = $forms->hasMorePages();
+        $response['paging']['lastItem'] = $forms->lastItem();
+        $response['paging']['lastPage'] = $forms->lastPage();
+                
+        if(!is_null($forms->nextPageUrl()))
+        {
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['nextPageUrl'] = $forms->nextPageUrl();
+        }
+                
+        $response['paging']['onFirstPage'] = $forms->onFirstPage();
+        //$response['paging']['perPage'] = $forms->perPage();
+                
+        if(!is_null($forms->previousPageUrl()))
+        {
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl()."&limit=".$request->limit;
+        }
+        else
+        {            
+            $response['paging']['previousPageUrl'] = $forms->previousPageUrl();
+        }
+                
+        $response['paging']['total'] = $forms->total();
+
+        foreach($forms as $formKey => $form)
+        {                               
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            //$dt->setTimezone('GMT');
+            $submitDateTime = $dt->format(DateTime::ISO8601);   
+
+            if(trim($form->adwords_campaign_id) != "")
+            {
+                $analyticCampaignId = $form->adwords_campaign_id;
+            }
+            else
+            {
+                $analyticCampaignId = $form->facebook_campaign_id;
+            }
+
+            $array_name = explode(" ", $form->name);
+            $firstName = $array_name[0];
+            $lastName = "";
+
+            for($x=1;$x<count($array_name);$x++)
+            {
+                $lastName.= $array_name[$x].' ';
+            }
+
+            $lastName = substr($lastName, 0, -1);
+            
+            $response['links'] = array();
+            $response['content'][$formKey]['landingPageCallEvent']['rowId'] = "$form->id";
+            $response['content'][$formKey]['landingPageCallEvent']['analyticCampaignId'] = "$analyticCampaignId";
+            $response['content'][$formKey]['landingPageCallEvent']['channelId'] = "$form->channel_id";
+            $response['content'][$formKey]['landingPageCallEvent']['firstName'] = "$firstName";
+            $response['content'][$formKey]['landingPageCallEvent']['lastName'] = "$lastName";
+            $response['content'][$formKey]['landingPageCallEvent']['email'] = "$form->email";
+            $response['content'][$formKey]['landingPageCallEvent']['phone'] = "$form->phone";
+            $response['content'][$formKey]['landingPageCallEvent']['custom_attributes'] = "$form->custom_attributes";
+            $response['content'][$formKey]['landingPageCallEvent']['submitDateTime'] = "$submitDateTime";
+
+            $response['content'][$formKey]['links'][0]['rel'] = "self";                
+            $response['content'][$formKey]['links'][0]['href'] = "http://leadservice.heroleads.co.th/leadService/public/index.php/getForms2/".$form->channel_id."/".$form->phone."/".$submitDateTime;
+            $response['content'][$formKey]['links'][0]['hreflang'] = null;
+            $response['content'][$formKey]['links'][0]['media'] = null;
+            $response['content'][$formKey]['links'][0]['title'] = null;
+            $response['content'][$formKey]['links'][0]['type'] = null;
+            $response['content'][$formKey]['links'][0]['deprecation'] = null;
+        }
+        
+        //$response = json_encode($response);
+        return $response;                  
+    }
+
+    public function Response_getForms_AnalyticCampaignId_ChannelId_Count(Request $request)
+    {                
+        $array_channel = array(); 
+        $key = 0;
+
+        if(isset($request->analyticCampaignId))
+        {
+            $count_analyticCampaignId = count($request->analyticCampaignId);
+            if($count_analyticCampaignId > 0)
+            {
+                $channels_analyticCampaignIds = Channel::whereIn('adwords_campaign_id', $request->analyticCampaignId)->orWhereIn('facebook_campaign_id', $request->analyticCampaignId)->get();
+                
+                foreach($channels_analyticCampaignIds as $channels_analyticCampaignId)
+                {
+                    $array_channel[$key] = $channels_analyticCampaignId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('channel_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
+                    $key++;
+                }
+            }
+        }
+        
+        $response = array();
+
+        $count = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->whereIn('channels.channel_id', $array_channel)                    
+                    ->whereBetween('forms.created_at_forms', [$request->startDateTime, $request->endDateTime])
+                    ->count();    
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->startDateTime);
+        //$dt->setTimezone($this->timezone);
+        $StartDateTime = $dt->format(DateTime::ISO8601);   
+            
+        $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $request->endDateTime);
+        //$dt2->setTimezone($this->timezone);
+        $EndDateTime = $dt2->format(DateTime::ISO8601);   
+
+        $response['fromDateTime'] = "$StartDateTime";
+        $response['totalCalls'] = "$count";
+        $response['toDateTime'] = "$EndDateTime";
+        
+        //$response = json_encode($response);
+        return $response;
+    }
+    
+    public function Reponse_getForms_AnalyticCampaignId_ChannelId_Count_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {                
+        $array_channel = array(); 
+        $key = 0;
+
+        if(isset($request->analyticCampaignId))
+        {
+            $count_analyticCampaignId = count($request->analyticCampaignId);
+            if($count_analyticCampaignId > 0)
+            {
+                $channels_analyticCampaignIds = Channel::whereIn('adwords_campaign_id', $request->analyticCampaignId)->orWhereIn('facebook_campaign_id', $request->analyticCampaignId)->get();
+                
+                foreach($channels_analyticCampaignIds as $channels_analyticCampaignId)
+                {
+                    $array_channel[$key] = $channels_analyticCampaignId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('channel_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
+                    $key++;
+                }
+            }
+        }
+        
+        $response = array();
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->startDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+
+            $count_forms = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->whereIn('channels.channel_id', $array_channel)                    
+                    ->whereBetween('forms.created_at_forms', [$StartDateTime, $EndDateTime])
+                    ->count();    
+
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalCalls'] = "$count_forms";            
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
+    }
+    
+    public function Reponse_getForms_AnalyticCampaignId_ChannelId_Unique(Request $request)
+    {                        
+        $array_channel = array(); 
+        $key = 0;
+
+        if(isset($request->analyticCampaignId))
+        {
+            $count_analyticCampaignId = count($request->analyticCampaignId);
+            if($count_analyticCampaignId > 0)
+            {
+                $channels_analyticCampaignIds = Channel::whereIn('adwords_campaign_id', $request->analyticCampaignId)->orWhereIn('facebook_campaign_id', $request->analyticCampaignId)->get();
+                
+                foreach($channels_analyticCampaignIds as $channels_analyticCampaignId)
+                {
+                    $array_channel[$key] = $channels_analyticCampaignId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('channel_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        $response = array();
+
+        $count = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->whereIn('channels.channel_id', $array_channel)                                  
+                    ->where('is_duplicated', '=', '0')      
+                    ->whereBetween('forms.created_at_forms', [$request->startDateTime, $request->endDateTime])
+                    ->count();    
+                    
+        $dt = Carbon::createFromFormat('Y-m-d H:i:s', $request->startDateTime);
+        //$dt->setTimezone($this->timezone);
+        $StartDateTime = $dt->format(DateTime::ISO8601);   
+            
+        $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $request->endDateTime);
+        //$dt2->setTimezone($this->timezone);
+        $EndDateTime = $dt2->format(DateTime::ISO8601);   
+
+        $response['fromDateTime'] = "$StartDateTime";
+        $response['totalUniqueCalls'] = "$count";
+        $response['toDateTime'] = "$EndDateTime";
+        
+        //$response = json_encode($response);
+        return $response;
+
+    }
+        
+    public function Reponse_getForms_AnalyticCampaignId_ChannelId_Unique_Daybyday(Request $request, $timezone_StartDate, $timezone_EndDate, $StartDateTime_Convert, $EndDateTime_Convert, $count)
+    {                                  
+        $array_channel = array(); 
+        $key = 0;
+
+        if(isset($request->analyticCampaignId))
+        {
+            $count_analyticCampaignId = count($request->analyticCampaignId);
+            if($count_analyticCampaignId > 0)
+            {
+                $channels_analyticCampaignIds = Channel::whereIn('adwords_campaign_id', $request->analyticCampaignId)->orWhereIn('facebook_campaign_id', $request->analyticCampaignId)->get();
+                
+                foreach($channels_analyticCampaignIds as $channels_analyticCampaignId)
+                {
+                    $array_channel[$key] = $channels_analyticCampaignId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        if(isset($request->channelId))
+        {
+            $count_channelId = count($request->channelId);
+            if($count_channelId > 0)
+            {
+                $channels_channelIds = Channel::whereIn('channel_id', $request->channelId)->get();
+                
+                foreach($channels_channelIds as $channels_channelId)
+                {
+                    $array_channel[$key] = $channels_channelId->channel_id;
+                    $key++;
+                }
+            }
+        }
+
+        $response = array();      
+
+        $last_day = $count-1;
+        
+        for($day=0;$day<$count;$day++)
+        {            
+            if($day ==0)
+            {
+                $StartDateTime = $StartDateTime_Convert;
+
+                $array = explode("T",$request->startDateTime);
+                $EndDateTime = $array[0]." 23:59:59"."+".$timezone_StartDate;
+
+                $dt = Carbon::parse($EndDateTime);
+                $EndDateTime = $dt->setTimezone($this->timezone);
+            }
+            else if($day == $last_day)
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+                                
+                $EndDateTime = $EndDateTime_Convert;
+            }
+            else
+            {
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $StartDateTime = $dt->addSecond();
+
+                $dt = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+                $EndDateTime = $dt->addDay();
+            }
+            
+            $analyticCampaignId_use = $request->analyticCampaignId;
+
+            $count_forms = DB::table('forms')
+                    ->join('channels', 'channels.channel_id', '=', 'forms.channel_id')
+                    ->whereIn('channels.channel_id', $array_channel)  
+                    ->where('is_duplicated', '=', '0')                 
+                    ->whereBetween('forms.created_at_forms', [$StartDateTime, $EndDateTime])
+                    ->count();    
+
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $StartDateTime);
+            //$dt->setTimezone($this->timezone);
+            $Start_DateTime = $dt->format(DateTime::ISO8601);   
+                
+            $dt2 = Carbon::createFromFormat('Y-m-d H:i:s', $EndDateTime);
+            //$dt2->setTimezone($this->timezone);
+            $End_DateTime = $dt2->format(DateTime::ISO8601);   
+    
+            $response[$day]['fromDateTime'] = "$Start_DateTime";
+            $response[$day]['totalUniqueCalls'] = "$count_forms";            
+            $response[$day]['toDateTime'] = "$End_DateTime";
+        }
+
+        //$response = json_encode($response);
+        return $response;
     }
 }
