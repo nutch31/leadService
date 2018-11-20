@@ -122,6 +122,9 @@ $router->put('/updateParentIdDuplicatedForms', 'Api\FormController@UpdateParentI
 //Push Lead Data From Alpha to LeadService
 $router->post('/push-leads-data', 'Api\PushLeadsDataFromAlphaController@PushLeadsData');
 
+//Get All Calls & Submit Form & Direct
+$router->get('/getAllLeadsByMonth', 'Api\GetAllLeadsController@getAllLeadsByMonth'); 
+
 //Integrate LeadService with MessageService
 $router->get('/sendMail', 'Api\SendMailController@SendMail');
 
