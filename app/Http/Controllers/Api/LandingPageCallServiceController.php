@@ -183,12 +183,7 @@ class LandingPageCallServiceController extends BaseController
                      ]
                     );
 
-        $val = json_encode($arr);
-
-        
-
-        print_r($val);
-        echo "\n";
+        $val = json_encode($arr);        
 
         $url = env("ALPHA_API");
         $url .= "push-leads-data";
@@ -205,9 +200,6 @@ class LandingPageCallServiceController extends BaseController
             'Content-Length: ' . strlen($val))
         );     
         $response = curl_exec($ch);
-        
-        echo $response;
-        echo "\n\n";
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
@@ -251,9 +243,9 @@ class LandingPageCallServiceController extends BaseController
             $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
         }
         
-        /*return response(array(
+        return response(array(
             'Status' => 'Success'
-        ), '200');*/
+        ), '200');
     }
 
     public function PullLeadsForms_ChannelId(Request $request)
