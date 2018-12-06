@@ -127,7 +127,6 @@ class LandingPageCallServiceController extends BaseController
             $this->call_alpha($channel_id, $name, $phone_number, $email, $submitted_date_time, $Landingpagecallservice->id, $form->id, $is_duplicated, $parent_id_duplicated, $data_json, $kind);
         }        
     }
-
     
     public function call_alpha($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id, $is_duplicated, $parent_id_duplicated, $data_json, $kind)
     {   
@@ -217,6 +216,98 @@ class LandingPageCallServiceController extends BaseController
         }
     }   
     
+    public function call_alpha_test($channel_id, $name, $tel, $email, $submitted_date_time, $Landingpagecallservice_id, $form_id, $is_duplicated, $parent_id_duplicated, $data_json, $kind)
+    {   
+        $Channel = Channel::where('channel_id', '=', $channel_id)->select('adwords_campaign_id', 'facebook_campaign_id')->first();
+
+        if(!empty($Channel->adwords_campaign_id))
+        {
+            $analytic_campaign_id = $Channel->adwords_campaign_id;
+        }
+        else
+        {
+            $analytic_campaign_id = $Channel->facebook_campaign_id;
+        }
+
+        if($kind == "offline" && $analytic_campaign_id == "")
+        {
+            $type = "direct";
+        }
+        else
+        {
+            $type = "submitted";
+        }
+
+        $data_array = json_decode($data_json, true);               
+
+        $array_name = explode(" ", $name);
+        $count = count($array_name);
+
+        $first_name = $array_name[0];
+        $last_name = '';
+
+        for($a=1;$a<$count;$a++)
+        {
+            $last_name .= $array_name[$a].' ';
+        }
+
+        $last_name = substr($last_name, 0, -1);
+
+        $arr = array(
+                     'type' => $type,
+                     'data' => [
+                         '_id' => $form_id,
+                         'channel_id' => $channel_id,
+                         'first_name' => $first_name,
+                         'last_name' => $last_name,
+                         'tel' => $tel,
+                         'email' => $email,
+                         'submitted_date_time' => $submitted_date_time,
+                         'is_duplicated' => $is_duplicated,
+                         'parent_id_duplicated' => $parent_id_duplicated,
+                         'content' => $data_array,
+                         'analytic_campaign_id' => $analytic_campaign_id
+                     ]
+                    );
+
+        $val = json_encode($arr);        
+
+        $url = env("ALPHA_API_TEST");
+        $url .= "push-leads-data";
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
+            
+        curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $val);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+            'Content-Type: application/json',                                                                                
+            'Content-Length: ' . strlen($val))
+        );     
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
+        curl_close($ch);
+
+        echo $url;
+        print_r($arr);
+        echo $response;
+
+        if(!is_null($Landingpagecallservice_id))
+        {
+            $Landingpagecallservice = Landingpagecallservice::find($Landingpagecallservice_id);
+            $Landingpagecallservice->request_alpha = $val;
+
+            if($info == "200" || $info == "201")
+            {
+                $Landingpagecallservice->status_alpha = 1;
+            }
+            
+            $Landingpagecallservice->save();
+        }
+    }
+    
     public function PullLeadsForms(Request $request)
     {   
         $channel = Channel::where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId)->first();
@@ -247,6 +338,37 @@ class LandingPageCallServiceController extends BaseController
             'Status' => 'Success'
         ), '200');
     }
+    
+    public function PullLeadsFormsTest(Request $request)
+    {   
+        $channel = Channel::where('channels.adwords_campaign_id', '=', $request->analyticCampaignId)->orWhere('channels.facebook_campaign_id', '=', $request->analyticCampaignId)->first();
+
+        $forms = Form::where('channel_id', '=', $channel->channel_id);
+        if(isset($request->StartDateTime) && isset($request->EndDateTime))
+        {                
+            $request->StartDateTime = Carbon::parse($request->StartDateTime);
+            $request->StartDateTime->setTimezone($this->timezone);
+
+            $request->EndDateTime = Carbon::parse($request->EndDateTime);
+            $request->EndDateTime->setTimezone($this->timezone);
+            
+            $forms = $forms->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime]);
+        }
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')->get();
+
+        foreach($forms as $form)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
+
+            $this->call_alpha_test($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+        }
+        
+        return response(array(
+            'Status' => 'Success'
+        ), '200');
+    }
 
     public function PullLeadsForms_ChannelId(Request $request)
     {   
@@ -270,6 +392,36 @@ class LandingPageCallServiceController extends BaseController
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
             $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+        }
+                
+        return response(array(
+            'Status' => 'Success'
+        ), '200');
+
+    }
+
+    public function PullLeadsForms_ChannelIdTest(Request $request)
+    {   
+        $forms = Form::where('channel_id', '=', $request->channelId);
+        if(isset($request->StartDateTime) && isset($request->EndDateTime))
+        {                
+            $request->StartDateTime = Carbon::parse($request->StartDateTime);
+            $request->StartDateTime->setTimezone($this->timezone);
+
+            $request->EndDateTime = Carbon::parse($request->EndDateTime);
+            $request->EndDateTime->setTimezone($this->timezone);
+            
+            $forms = $forms->whereBetween('forms.created_at_forms', [$request->StartDateTime, $request->EndDateTime]);
+        }
+        $forms = $forms->orderBy('forms.created_at_forms', 'asc')->get();
+
+        foreach($forms as $form)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $form->created_at_forms);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);   
+
+            $this->call_alpha_test($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
         }
                 
         return response(array(

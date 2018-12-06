@@ -270,9 +270,71 @@ class PbxCallServiceController extends BaseController
             }
             $Pbxcallservice->save();
         }
-    }
-    
+    }    
 
+    public function call_alpha_test($channel_id, $submitted_date_time, $caller_phone_number, $status, $call_direction, $recording_url, $Pbxcallservice_id, $call_id, $is_duplicated, $parent_id_duplicated, $duration, $tracking_phone)
+    {
+        if($status == 1)
+        {
+            $text = "ANSWER";
+        }
+        else 
+        {
+            $text = "MISSED CALL";
+        }       
+
+        $arr = array(
+                        'type' => 'phone',
+                        'data' => [
+                            '_id' => $call_id,
+                            'channel_id' => $channel_id,
+                            'submitted_date_time' => $submitted_date_time,
+                            'caller_phone_number' => $caller_phone_number,
+                            'status' => $text,
+                            'call_direction' => $call_direction,
+                            'recording_url' => $recording_url,
+                            'is_duplicated' => $is_duplicated,
+                            'parent_id_duplicated' => $parent_id_duplicated,
+                            'duration' => $duration,
+                            'did_phone' => $tracking_phone
+                        ]
+                    );
+        $val = json_encode($arr);
+        
+        $url = env("ALPHA_API_TEST");
+        $url .= "push-leads-data";
+        
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST"); 
+            
+        curl_setopt($ch, CURLOPT_VERBOSE, true);
+
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $val);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(                                                                          
+            'Content-Type: application/json',                                                                                
+            'Content-Length: ' . strlen($val))
+        );     
+        $response = curl_exec($ch);
+        $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
+        curl_close($ch);
+
+        echo $url;
+        print_r($arr);
+        echo $response;
+
+        if(!is_null($Pbxcallservice_id))
+        {
+            $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);
+            $Pbxcallservice->request_alpha = $val;
+            
+            if($info == "200" || $info == "201")
+            {
+                $Pbxcallservice->status_alpha = 1;
+            }
+            $Pbxcallservice->save();
+        }
+    }
     
     public function PullLeadsCalls(Request $request)
     {   
@@ -298,6 +360,37 @@ class PbxCallServiceController extends BaseController
             $submitted_date_time = $dt->format(DateTime::ISO8601);
 
             $this->call_alpha($call->channel_id, $submitted_date_time, $call->phone, $call->status, "Incoming", $call->recording_url, Null, $call->id, $call->is_duplicated, $call->parent_id_duplicated, $call->duration, $request->DidPhone);
+        }
+        
+        return response(array(
+            'Status' => 'Success'
+        ), '200');
+    }
+    
+    public function PullLeadsCallsTest(Request $request)
+    {   
+        $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->first();
+        
+        $calls = Call::where('channel_id', '=', $channel->channel_id);
+        if(isset($request->StartDateTime) && isset($request->EndDateTime))
+        {                
+            $request->StartDateTime = Carbon::parse($request->StartDateTime);
+            $request->StartDateTime->setTimezone($this->timezone);
+
+            $request->EndDateTime = Carbon::parse($request->EndDateTime);
+            $request->EndDateTime->setTimezone($this->timezone);
+            
+            $calls = $calls->whereBetween('calls.date', [$request->StartDateTime, $request->EndDateTime]);
+        }
+        $calls = $calls->orderBy('calls.date', 'asc')->get();
+
+        foreach($calls as $call)
+        {
+            $dt = Carbon::createFromFormat('Y-m-d H:i:s', $call->date);
+            $dt->setTimezone($this->timezone);
+            $submitted_date_time = $dt->format(DateTime::ISO8601);
+
+            $this->call_alpha_test($call->channel_id, $submitted_date_time, $call->phone, $call->status, "Incoming", $call->recording_url, Null, $call->id, $call->is_duplicated, $call->parent_id_duplicated, $call->duration, $request->DidPhone);
         }
         
         return response(array(

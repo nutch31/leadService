@@ -106,8 +106,11 @@ $router->post('/LandingPageCallService', 'Api\LandingPageCallServiceController@L
 
 //Pull Calls & Submit From & Direct LeadService to Alpha 
 $router->get('/pullLeadsCalls/{DidPhone:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\PbxCallServiceController@PullLeadsCalls');
+$router->get('/pullLeadsCallsTest/{DidPhone:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\PbxCallServiceController@PullLeadsCallsTest');
 $router->get('/pullLeadsForms/{analyticCampaignId:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\LandingPageCallServiceController@PullLeadsForms');
+$router->get('/pullLeadsFormsTest/{analyticCampaignId:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\LandingPageCallServiceController@PullLeadsFormsTest');
 $router->get('/pullLeadsForms2/{channelId:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\LandingPageCallServiceController@PullLeadsForms_ChannelId');
+$router->get('/pullLeadsForms2Test/{channelId:[0-9]+}[/{StartDateTime}[/{EndDateTime}]]', 'Api\LandingPageCallServiceController@PullLeadsForms_ChannelIdTest');
 $router->get('/pullAllLeadsCalls', 'Api\PbxCallServiceController@PullAllLeadsCalls');
 $router->get('/pullAllLeadsForms', 'Api\LandingPageCallServiceController@PullAllLeadsForms');
 
