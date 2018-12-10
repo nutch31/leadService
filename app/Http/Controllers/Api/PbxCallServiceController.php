@@ -338,7 +338,7 @@ class PbxCallServiceController extends BaseController
     
     public function PullLeadsCalls(Request $request)
     {   
-        $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->first();
+        $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->orderBy('id', 'desc')->first();
         
         $calls = Call::where('channel_id', '=', $channel->channel_id);
         if(isset($request->StartDateTime) && isset($request->EndDateTime))
@@ -369,7 +369,7 @@ class PbxCallServiceController extends BaseController
     
     public function PullLeadsCallsTest(Request $request)
     {   
-        $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->first();
+        $channel = Channel::where('tracking_phone', '=', $request->DidPhone)->orderBy('id', 'desc')->first();
         
         $calls = Call::where('channel_id', '=', $channel->channel_id);
         if(isset($request->StartDateTime) && isset($request->EndDateTime))
