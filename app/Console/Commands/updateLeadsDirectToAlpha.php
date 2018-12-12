@@ -87,10 +87,11 @@ class updateLeadsDirectToAlpha extends Command
                 curl_close($ch);
 
                 $response = json_decode($response_json, true);
+                
+                $array_leadservice_id = array();
                         
                 if($response["status"] == "not equal")
                 {             
-                    $array_leadservice_id = array();
 
                     $forms = Form::select('id', 'channel_id', 'name', 'phone', 'email', 'is_duplicated', 'parent_id_duplicated', 'custom_attributes', 'created_at_forms')
                                     ->where('channel_id', '=', $channel->channel_id)

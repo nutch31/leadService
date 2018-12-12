@@ -84,10 +84,11 @@ class updateLeadsCallToAlpha extends Command
                 curl_close($ch);
 
                 $response = json_decode($response_json, true);
+                
+                $array_leadservice_id = array();
                         
                 if($response["status"] == "not equal")
                 {
-                    $array_leadservice_id = array();
 
                     $calls = Call::select('id', 'date', 'duration', 'phone', 'status', 'recording_url', 'is_duplicated', 'parent_id_duplicated')
                                     ->where('channel_id', '=', $channel->channel_id)
