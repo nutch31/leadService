@@ -319,10 +319,6 @@ class PbxCallServiceController extends BaseController
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
-        echo $url;
-        print_r($arr);
-        echo $response;
-
         if(!is_null($Pbxcallservice_id))
         {
             $Pbxcallservice = Pbxcallservice::find($Pbxcallservice_id);

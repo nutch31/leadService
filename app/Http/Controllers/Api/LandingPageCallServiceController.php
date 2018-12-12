@@ -290,10 +290,6 @@ class LandingPageCallServiceController extends BaseController
         $info = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
         curl_close($ch);
 
-        echo $url;
-        print_r($arr);
-        echo $response;
-
         if(!is_null($Landingpagecallservice_id))
         {
             $Landingpagecallservice = Landingpagecallservice::find($Landingpagecallservice_id);
@@ -331,7 +327,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $channel->kind);
         }
         
         return response(array(
@@ -362,7 +358,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha_test($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+            $this->call_alpha_test($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $channel->kind);
         }
         
         return response(array(
@@ -372,6 +368,8 @@ class LandingPageCallServiceController extends BaseController
 
     public function PullLeadsForms_ChannelId(Request $request)
     {   
+        $channel = Channel::where('channel_id', '=', $request->channelId);
+
         $forms = Form::where('channel_id', '=', $request->channelId);
         if(isset($request->StartDateTime) && isset($request->EndDateTime))
         {                
@@ -391,7 +389,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+            $this->call_alpha($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $channel->kind);
         }
                 
         return response(array(
@@ -402,6 +400,8 @@ class LandingPageCallServiceController extends BaseController
 
     public function PullLeadsForms_ChannelIdTest(Request $request)
     {   
+        $channel = Channel::where('channel_id', '=', $request->channelId);
+
         $forms = Form::where('channel_id', '=', $request->channelId);
         if(isset($request->StartDateTime) && isset($request->EndDateTime))
         {                
@@ -421,7 +421,7 @@ class LandingPageCallServiceController extends BaseController
             $dt->setTimezone($this->timezone);
             $submitted_date_time = $dt->format(DateTime::ISO8601);   
 
-            $this->call_alpha_test($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $form->kind);
+            $this->call_alpha_test($form->channel_id, $form->name, $form->phone, $form->email, $submitted_date_time, Null, $form->id, $form->is_duplicated, $form->parent_id_duplicated, $form->custom_attributes, $channel->kind);
         }
                 
         return response(array(

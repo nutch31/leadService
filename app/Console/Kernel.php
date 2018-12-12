@@ -14,6 +14,10 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
+        //Commands\updateLeadsToAlpha::class,
+        Commands\updateLeadsCallToAlpha::class,
+        Commands\updateLeadsDirectToAlpha::class,
+        Commands\updateLeadsFormToAlpha::class,
     ];
 
     /**
@@ -25,5 +29,22 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         //
+        /*
+        $schedule->command('command:updateLeadsToAlpha')
+        ->timezone('Asia/Bangkok')
+        ->dailyAt('12:00');
+        */
+        
+        $schedule->command('command:updateLeadsCallToAlpha')
+        ->timezone('Asia/Bangkok')
+        ->dailyAt('00:00');
+        
+        $schedule->command('command:updateLeadsDirectToAlpha')
+        ->timezone('Asia/Bangkok')
+        ->dailyAt('02:00');
+        
+        $schedule->command('command:updateLeadsFormToAlpha')
+        ->timezone('Asia/Bangkok')
+        ->dailyAt('04:00');
     }
 }
