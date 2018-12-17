@@ -35,6 +35,7 @@ class Kernel extends ConsoleKernel
         ->dailyAt('12:00');
         */
         
+        
         $schedule->command('command:updateLeadsCallToAlpha')
         ->timezone('Asia/Bangkok')
         ->hourlyAt(5);
@@ -46,5 +47,6 @@ class Kernel extends ConsoleKernel
         $schedule->command('command:updateLeadsFormToAlpha')
         ->timezone('Asia/Bangkok')
         ->hourlyAt(30);
+        
     }
 }

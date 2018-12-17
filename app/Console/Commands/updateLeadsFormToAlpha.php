@@ -75,7 +75,7 @@ class updateLeadsFormToAlpha extends Command
                 );
                 $val = json_encode($arr);
                 
-                $url = env("ALPHA_API_TEST");
+                $url = env("ALPHA_API");
                 $url .= "checking-leads-data";
 
                 $ch = curl_init($url);
@@ -112,7 +112,7 @@ class updateLeadsFormToAlpha extends Command
                         $submitted_date_time = $dt->format(DateTime::ISO8601); 
 
                         $param = app()->make('App\Http\Controllers\Api\LandingPageCallServiceController');
-                        $param->call_alpha_test(
+                        $param->call_alpha(
                             $channel->channel_id, 
                             $form->name, 
                             $form->phone, 
