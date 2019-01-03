@@ -623,8 +623,8 @@ class FormController extends BaseController
     public function UpdateParentIdDuplicatedForms(Request $request)
     {
         $forms = DB::table('forms')
-                    ->select('id','channel_id','phone','email')
-                    ->orderBy('forms.id', 'asc')
+                    ->select('id','channel_id','phone','email','created_at_forms')
+                    ->orderBy('forms.created_at_forms', 'asc')
                     ->paginate($request->limit);
                         
         $response['paging']['count'] = $forms->count();
@@ -671,29 +671,29 @@ class FormController extends BaseController
                 $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
             }
                     
-            $count = Form::whereIn('channel_id', $array_channels)->where('id', '!=', $form->id)->where('id', '<', $form->id)->where(function($query) use ($email, $phone_number)
+            $count = Form::whereIn('channel_id', $array_channels)->where('id', '!=', $form->id)->where('created_at_forms', '<', $form->created_at_forms)->where(function($query) use ($email, $phone_number)
             {
                 $query->where('email', '=', $email)->where('email', '!=', '')->orWhere('phone', '=', $phone_number)->where('phone', '!=', '');
             })->count();
 
             if($count > 0)
             {
-                $parent_id_duplicated = Form::whereIn('channel_id', $array_channels)->where('id', '!=', $form->id)->where('id', '<', $form->id)->where(function($query) use ($email, $phone_number)
+                $parent_id_duplicated = Form::whereIn('channel_id', $array_channels)->where('id', '!=', $form->id)->where('created_at_forms', '<', $form->created_at_forms)->where(function($query) use ($email, $phone_number)
                 {
                     $query->where('email', '=', $email)->where('email', '!=', '')->orWhere('phone', '=', $phone_number)->where('phone', '!=', '');
-                })->orderBy('id', 'asc')->select('id')->first();
+                })->orderBy('created_at_forms', 'asc')->select('id')->first();
                                      
-                //$form_update = Form::find($form->id);
-                //$form_update->is_duplicated = 1;
-                //$form_update->parent_id_duplicated = $parent_id_duplicated->id;
-                //$form_update->save();                
+                $form_update = Form::find($form->id);
+                $form_update->is_duplicated = 1;
+                $form_update->parent_id_duplicated = $parent_id_duplicated->id;
+                $form_update->save();                
             }
             else
             {
-                //$form_update = Form::find($form->id);
-                //$form_update->is_duplicated = 0;
-                //$form_update->parent_id_duplicated = '';
-                //$form_update->save();
+                $form_update = Form::find($form->id);
+                $form_update->is_duplicated = 0;
+                $form_update->parent_id_duplicated = '';
+                $form_update->save();
             } 
                                         
             $response['content'][$formKey]['landingPageCallEvent']['rowId'] = "$form->id";

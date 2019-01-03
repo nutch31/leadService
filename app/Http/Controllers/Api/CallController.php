@@ -754,8 +754,8 @@ class CallController extends BaseController
     public function UpdateParentIdDuplicatedCalls(Request $request)
     {
         $calls = DB::table('calls')
-                    ->select('id','channel_id','phone')
-                    ->orderBy('calls.id', 'asc')
+                    ->select('id','channel_id','phone','date')
+                    ->orderBy('calls.date', 'asc')
                     ->paginate($request->limit);
                         
         $response['paging']['count'] = $calls->count();
@@ -800,23 +800,23 @@ class CallController extends BaseController
                 $array_channels[$ChannelIdKey] = $ChannelId->channel_id;
             }
                     
-            $count = Call::whereIn('channel_id', $array_channels)->where('id', '!=', $call->id)->where('id', '<', $call->id)->where('phone', '=', $call->phone)->count();
+            $count = Call::whereIn('channel_id', $array_channels)->where('id', '!=', $call->id)->where('date', '<', $call->date)->where('phone', '=', $call->phone)->count();
 
             if($count > 0)
             {
-                $parent_id_duplicated = Call::whereIn('channel_id', $array_channels)->where('id', '!=', $call->id)->where('id', '<', $call->id)->where('phone', '=', $call->phone)->orderBy('id', 'asc')->select('id')->first();
+                $parent_id_duplicated = Call::whereIn('channel_id', $array_channels)->where('id', '!=', $call->id)->where('date', '<', $call->date)->where('phone', '=', $call->phone)->orderBy('date', 'asc')->select('id')->first();
                                      
-                //$call_update = Call::find($call->id);
-                //$call_update->is_duplicated = 1;
-                //$call_update->parent_id_duplicated = $parent_id_duplicated->id;
-                //$call_update->save();                
+                $call_update = Call::find($call->id);
+                $call_update->is_duplicated = 1;
+                $call_update->parent_id_duplicated = $parent_id_duplicated->id;
+                $call_update->save();                
             }
             else
             {
-                //$call_update = Call::find($call->id);
-                //$call_update->is_duplicated = 0;
-                //$call_update->parent_id_duplicated = '';
-                //$call_update->save();
+                $call_update = Call::find($call->id);
+                $call_update->is_duplicated = 0;
+                $call_update->parent_id_duplicated = '';
+                $call_update->save();
             } 
                                         
             $response['content'][$callKey]['PbxpageCallEvent']['rowId'] = "$call->id";
