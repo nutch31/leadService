@@ -147,6 +147,10 @@ class CallsFormsController extends BaseController
                 {
                     $calls = $calls->where('calls.status', '=', $request->status);
                 }
+                if(isset($request->is_duplicated))
+                {
+                    $calls = $calls->where('calls.is_duplicated', '=', $request->is_duplicated);
+                }
 
                 $calls = $calls->orderBy('calls.date', 'asc')
                                 ->get();                                        
@@ -249,6 +253,10 @@ class CallsFormsController extends BaseController
                 if(isset($request->startDateTime) && isset($request->endDateTime))
                 {
                     $forms = $forms->whereBetween('forms.created_at_forms', [$request->startDateTime, $request->endDateTime]);
+                }
+                if(isset($request->is_duplicated))
+                {
+                    $forms = $forms->where('forms.is_duplicated', '=', $request->is_duplicated);
                 }
 
                 $forms = $forms->orderBy('forms.created_at_forms', 'asc')

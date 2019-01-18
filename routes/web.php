@@ -131,6 +131,9 @@ $router->get('/getAllLeadsByMonth', 'Api\GetAllLeadsController@getAllLeadsByMont
 //Integrate LeadService with MessageService
 $router->get('/sendMail', 'Api\SendMailController@SendMail');
 
+//Cron job to verify every Campaign have correct Lead amount
+$router->get('/verifyLeadsEveryCampaign', 'Api\VerifyLeadsEveryCampaign@verifyLeadsEveryCampaign');
+
 
 
 
