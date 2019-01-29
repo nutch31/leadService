@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         Commands\updateLeadsCallToAlpha::class,
         Commands\updateLeadsDirectToAlpha::class,
         Commands\updateLeadsFormToAlpha::class,
+        Commands\verifyLeadsEveryCampaign::class,
     ];
 
     /**
@@ -48,6 +49,11 @@ class Kernel extends ConsoleKernel
         ->timezone('Asia/Bangkok')
         ->hourlyAt(30);
         */
+
+        $schedule->command('command:verifyLeadsEveryCampaign')
+        ->timezone('Asia/Bangkok')
+        ->dailyAt('03:00');
+        
         
     }
 }
