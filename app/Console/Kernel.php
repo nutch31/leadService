@@ -49,10 +49,10 @@ class Kernel extends ConsoleKernel
         ->timezone('Asia/Bangkok')
         ->hourlyAt(30);
         */
-
         $schedule->command('command:verifyLeadsEveryCampaign')
         ->timezone('Asia/Bangkok')
         ->dailyAt('03:00');
+        
         
         
     }
