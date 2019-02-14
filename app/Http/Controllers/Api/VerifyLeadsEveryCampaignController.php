@@ -28,7 +28,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
     {   
         $array_response = array();
 
-        $get_data_verify_leads = $this->call_alpha0("lead-service/campaign/get-data-verify-leads");
+        $get_data_verify_leads = $this->call_alpha("lead-service/campaign/get-data-verify-leads");
         
         foreach($get_data_verify_leads as $keyGetDataVerifyLeads => $get_data_verify_lead)
         {            
@@ -47,7 +47,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                 $array_response[$keyGetDataVerifyLeads]["email"]               = $get_data_verify_lead["email"];
                 $array_response[$keyGetDataVerifyLeads]["name"]                = $get_data_verify_lead["name"];
                 $array_response[$keyGetDataVerifyLeads]["email_from"]          = "alpha-noreply@heroleads.com";
-                $array_response[$keyGetDataVerifyLeads]["email_bcc"]           = array('nut@heroleads.com', 'palakorn@heroleads.com', 'pongchrist@heroleads.com', 'tarn@heroleads.com', 'nan@heroleads.com', 'pierre@heroleads.com', 'ch@heroleads.com');
+                $array_response[$keyGetDataVerifyLeads]["email_bcc"]           = array('nut@heroleads.com', 'palakorn@heroleads.com', 'pongchrist@heroleads.com', 'tarn@heroleads.com', 'nan@heroleads.com', 'pierre@heroleads.com');
                 $array_response[$keyGetDataVerifyLeads]["subject_name"]        = "Subject : Notify Incomplete Campaigns Data";
                 $array_response[$keyGetDataVerifyLeads]["lead_status"]         = "Success";
 
@@ -111,7 +111,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                 }
                 
                 /** Call Alpha API Find StartDate, EndDate CampaignId */
-                $date_range = $this->call_alpha0("crm/get-date-range/".$campaignId);
+                $date_range = $this->call_alpha("crm/get-date-range/".$campaignId);
 
                 if(empty($date_range))
                 {
@@ -150,9 +150,13 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                                 ->select('channels.channel_id', 'channels.tracking_phone')
                                                 ->whereIn('campaign_id', $array_campaign);
                                         if(!empty($date_range))
-                                        {   
-                                            $startDate_ = $date_range["startDate"]." 00:00:00";
-                                            $endDate_ = $date_range["endDate"]." 23:59:59";
+                                        {                                                                   
+                                            $dt         = Carbon::parse($date_range["startDate"]. "00:00:00", $this->local_timezone);
+                                            $startDate_ =  Carbon::createFromFormat('Y-m-d H:i:s', $dt, $this->local_timezone)->setTimezone($this->timezone);
+                                            
+                                            $dt       = Carbon::parse($date_range["endDate"]. "23:59:59", $this->local_timezone);
+                                            $endDate_ =  Carbon::createFromFormat('Y-m-d H:i:s', $dt, $this->local_timezone)->setTimezone($this->timezone);
+                                            
                                             $channel_calls = $channel_calls->whereBetween('date', array($startDate_, $endDate_));
                                         }
                                                 //->where('tracking_phone', '!=', '')
@@ -181,9 +185,13 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                                 //    $q->where('facebook_campaign_id', '!=', '')->orWhere('adwords_campaign_id', '!=', '');
                                                 //})
                                         if(!empty($date_range))
-                                        {
-                                            $startDate_ = $date_range["startDate"]." 00:00:00";
-                                            $endDate_ = $date_range["endDate"]." 23:59:59";
+                                        {                                                                                                  
+                                            $dt         = Carbon::parse($date_range["startDate"]. "00:00:00", $this->local_timezone);
+                                            $startDate_ =  Carbon::createFromFormat('Y-m-d H:i:s', $dt, $this->local_timezone)->setTimezone($this->timezone);
+                                            
+                                            $dt       = Carbon::parse($date_range["endDate"]. "23:59:59", $this->local_timezone);
+                                            $endDate_ =  Carbon::createFromFormat('Y-m-d H:i:s', $dt, $this->local_timezone)->setTimezone($this->timezone);
+
                                             $channel_forms = $channel_forms->whereBetween('created_at_forms', array($startDate_, $endDate_));
                                         }
                         $channel_forms = $channel_forms->groupBy('channels.channel_id')
@@ -213,8 +221,8 @@ class VerifyLeadsEveryCampaignController extends BaseController
                         if(!is_null($objective_id))
                         {
                             //Awareness Leads 
-                            if($objective_id != $this->awareness)
-                            {
+                            //if($objective_id != $this->awareness)
+                            //{
                                 $array_response[$keyGetDataVerifyLeads]["existing_in_leadservice"]["analytic_campaign_id"] = array_values(array_filter($array_channel_analytic_campaign_id)); 
                                 $array_response[$keyGetDataVerifyLeads]["existing_in_leadservice"]["channel_id"]           = array_values(array_filter($array_channel_channel_id));       
                                 $array_response[$keyGetDataVerifyLeads]["existing_in_leadservice"]["did_phone"]            = array_values(array_filter($array_channel_tracking_phone));    
@@ -299,7 +307,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     $endDateSearch  = urlencode($endDateSearch);
                                                         
                                     /** Call Alpha API total-called*/
-                                    $total_called_alpha       = $this->call_alpha0("crm/widget/total-called/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $total_called_alpha       = $this->call_alpha("crm/widget/total-called/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
                                     /** Call leadService API total-called*/
                                     $total_called_leadService = $this->call_leadservice("getCalls2/byPeriod/unique?startDateTime=".$startDateSearch."&endDateTime=".$endDateSearch.$channel_tracking_phone_string);            
         
@@ -317,7 +325,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["total_unique_called"]["total_unique_called_leadservice"] = $total_called_leadService["totalUniqueCalls"];
         
                                     /** Call Alpha API total-missed-calls*/
-                                    $total_missed_calls_alpha = $this->call_alpha0("crm/widget/total-missed-calls/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $total_missed_calls_alpha = $this->call_alpha("crm/widget/total-missed-calls/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
                                     /** Call leadService API total-missed-calls*/
                                     $total_missed_calls_leadService = $this->call_leadservice("getCalls2/byPeriod/unique?startDateTime=".$startDateSearch."&endDateTime=".$endDateSearch.$channel_tracking_phone_string."&status=2");            
         
@@ -335,7 +343,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["total_missed_calls"]["total_missed_calls_leadservice"] = $total_missed_calls_leadService["totalUniqueCalls"];
                                                         
                                     /** Call Alpha API total-missed-calls*/
-                                    $total_form_submitted = $this->call_alpha0("crm/widget/total-form-submitted/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $total_form_submitted = $this->call_alpha("crm/widget/total-form-submitted/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
                                     /** Call leadService API total-missed-calls*/
                                     $total_form_submitted_leadService = $this->call_leadservice("getForms2/byPeriod/unique?startDateTime=".$startDateSearch."&endDateTime=".$endDateSearch.$channel_analytic_campaign_id_string);            
         
@@ -353,7 +361,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["total_unique_forms_submitted"]["total_unique_forms_submitted_leadservice"] = $total_form_submitted_leadService["totalUniqueCalls"];
         
                                     /** Call Alpha API total-missed-calls*/
-                                    $total_unique_leads = $this->call_alpha0("crm/widget/total-unique-leads/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $total_unique_leads = $this->call_alpha("crm/widget/total-unique-leads/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
                                     /** Call leadService API total-missed-calls*/
                                     $total_unique_leads_leadService = $this->call_leadservice("getCallsForms/byPeriodDidPhoneAnalyticCampaignId/?page=1&limit=1&is_duplicated=0&startDateTime=".$startDateSearch."&endDateTime=".$endDateSearch.$channel_analytic_campaign_id_string.$channel_tracking_phone_string);                        
         
@@ -371,7 +379,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["total_unique_leads"]["total_unique_leads_leadservice"] = $total_unique_leads_leadService["total"];
         
                                     /** Call Alpha API recent-all-leads*/
-                                    $recent_leads = $this->call_alpha0("crm/recent-leads/all/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $recent_leads = $this->call_alpha("crm/recent-leads/all/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
         
                                     $count_calls = 0; 
                                     $count_forms = 0;
@@ -452,7 +460,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     }//end foreach recent all leads
         
                                     /** Call Alpha API recent-call-leads*/
-                                    $recent_leads_phone = $this->call_alpha0("crm/recent-leads/calls/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $recent_leads_phone = $this->call_alpha("crm/recent-leads/calls/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
         
                                     $count_calls = 0; 
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["recent_calls_leads"]["status"] = "Success";
@@ -497,7 +505,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     }//end foreach recent call leads
         
                                     /** Call Alpha API recent-forms-leads*/
-                                    $recent_leads_form = $this->call_alpha0("crm/recent-leads/forms/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $recent_leads_form = $this->call_alpha("crm/recent-leads/forms/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
         
                                     $count_forms = 0;
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["recent_forms_leads"]["status"] = "Success";
@@ -541,7 +549,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     }//end foreach recent form leads
         
                                     /** Call Alpha Api contacts-over-time*/
-                                    $contacts_over_times = $this->call_alpha0("crm/contacts-over-time/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $contacts_over_times = $this->call_alpha("crm/contacts-over-time/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
                                     /** Call leadService 2 Api (Calls, Forms) contacts-over-time*/
                                     //$contacts_over_times_call_leadservice = $this->call_leadservice("getCalls2/byMonthYear/unique/daybyday?startDateTime=".$startDateSearch."&endDateTime=".$endDateSearch.$channel_analytic_campaign_id_string.$channel_tracking_phone_string);                        
                                     //$contacts_over_times_forms_leadservice = $this->call_leadservice("getForms2/byMonthYear/unique/daybyday?&startDateTime=".$startDateSearch."&endDateTime=".$endDateSearch.$channel_analytic_campaign_id_string.$channel_tracking_phone_string);
@@ -612,7 +620,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     }
         
                                     /** Call Alpha Api contacts-over-time*/
-                                    $contacts_to_date = $this->call_alpha0("crm/contacts-to-date/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
+                                    $contacts_to_date = $this->call_alpha("crm/contacts-to-date/".$campaignId."/".$date_range["startDate"]."/".$date_range["endDate"]);
                                         
                                     $array_response[$keyGetDataVerifyLeads]["widget"]["accumulated_daily_unique_leads"]["status"] = "Success";
         
@@ -670,7 +678,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                     }
                                         
                                     /** Call Alpha Api list small Crm*/
-                                    $list_small_crm_alpha = $this->call_alpha0("crm/list/".$campaignId."?start_date=".$date_range["startDate"]."%2000%3A00%3A00&end_date=".$date_range["endDate"]."%2023%3A59%3A59&page=0&perPage=1&types%5B0%5D=submitted&types%5B1%5D=answer&types%5B2%5D=missed-call");
+                                    $list_small_crm_alpha = $this->call_alpha("crm/list/".$campaignId."?start_date=".$date_range["startDate"]."%2000%3A00%3A00&end_date=".$date_range["endDate"]."%2023%3A59%3A59&page=0&perPage=1&types%5B0%5D=submitted&types%5B1%5D=answer&types%5B2%5D=missed-call");
         
                                     if($total_unique_leads_leadService["total"] == $list_small_crm_alpha["data"]["total"])
                                     {                
@@ -686,7 +694,7 @@ class VerifyLeadsEveryCampaignController extends BaseController
                                         $array_response[$keyGetDataVerifyLeads]["widget"]["leads_management"]["all_leads_leadservice"]   = $total_unique_leads_leadService["total"];
                                     }    
                                 }
-                            }
+                            //}
                         }                                                                       
                     }
                 }
@@ -749,8 +757,8 @@ class VerifyLeadsEveryCampaignController extends BaseController
         $ch = curl_init(); 
         curl_setopt($ch, CURLOPT_URL, $url); 
         curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-            'secretKey: '.env("APP_SECRET_KEY_ALPHA0"),
-            'Authorization: Bearer '.env("TOTKEN_ALPHA0")
+            'secretKey: '.env("APP_SECRET_KEY_ALPHA1"),
+            'Authorization: Bearer '.env("TOTKEN_ALPHA1")
         ));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
         $output = curl_exec($ch); 

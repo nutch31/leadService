@@ -111,6 +111,15 @@ class updateLeadsFormToAlpha extends Command
                         $dt->setTimezone($this->timezone);
                         $submitted_date_time = $dt->format(DateTime::ISO8601); 
 
+                        if($form->is_duplicated == 0)
+                        {
+                            $is_duplicated = false;
+                        }
+                        else
+                        {
+                            $is_duplicated = true;
+                        }
+
                         $param = app()->make('App\Http\Controllers\Api\LandingPageCallServiceController');
                         $param->call_alpha(
                             $channel->channel_id, 
@@ -120,7 +129,7 @@ class updateLeadsFormToAlpha extends Command
                             $submitted_date_time, 
                             Null, 
                             $form->id, 
-                            $form->is_duplicated, 
+                            $is_duplicated, 
                             $form->parent_id_duplicated, 
                             $form->custom_attributes,                             
                             $channel->kind

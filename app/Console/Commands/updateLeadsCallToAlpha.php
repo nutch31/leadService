@@ -102,6 +102,15 @@ class updateLeadsCallToAlpha extends Command
                         $dt->setTimezone($this->timezone);
                         $submitted_date_time = $dt->format(DateTime::ISO8601);
 
+                        if($call->is_duplicated == 0)
+                        {
+                            $is_duplicated = false;
+                        }
+                        else
+                        {
+                            $is_duplicated = true;
+                        }
+
                         $param = app()->make('App\Http\Controllers\Api\PbxCallServiceController');
                         $param->call_alpha(
                             $channel->channel_id, 
@@ -112,7 +121,7 @@ class updateLeadsCallToAlpha extends Command
                             $call->recording_url, 
                             Null, 
                             $call->id, 
-                            $call->is_duplicated, 
+                            $is_duplicated, 
                             $call->parent_id_duplicated, 
                             $call->duration, 
                             $channel->tracking_phone
